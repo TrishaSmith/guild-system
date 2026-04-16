@@ -309,6 +309,13 @@ function completeMission(level) {
   alert(`Mission complete! +${reward} points`);
 }
 
+function toggleDropdown(header) {
+  const body = header.nextElementSibling;
+
+  body.style.display =
+    body.style.display === "none" ? "block" : "none";
+}
+
 // =====================================================
 // 🔄 RENDER ALL
 // =====================================================

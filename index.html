@@ -9,6 +9,8 @@
   <script src="app.js" defer></script>
   <script src="dice.js" defer></script>
   <script src="playerStatus.js" defer></script>
+
+  <script src="questScript.js" defer></script>  
 </head>
 
 <body>
@@ -50,6 +52,35 @@
     <h2>Mission Board</h2>
     <button onclick="generateBoard()">Generate Missions</button>
     <div id="missions"></div>
+  </div>
+
+  <!-- 🔽 DROPDOWN -->
+  <div class="dropdown">
+
+    <div class="dropdown-header" onclick="toggleDropdown(this)">
+      <h2>🧙 Quest Generator</h2>
+      <span>▼</span>
+    </div>
+
+    <div class="dropdown-body">
+
+      <div class="panel">
+        <h2>Generate Quests</h2>
+
+        <label>Amount:</label>
+        <input id="questCount" type="number" value="10" min="1" max="100">
+
+        <button onclick="generateQuests()">Generate</button>
+        <button onclick="clearQuests()">Clear</button>
+      </div>
+
+      <div class="panel">
+        <h2>Quests</h2>
+        <div id="questList"></div>
+      </div>
+
+    </div>
+
   </div>
 
   <!-- DICE -->
