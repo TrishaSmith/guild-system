@@ -1,0 +1,35 @@
+body {
+  font-family: Arial;
+  background: #0f172a;
+  color: white;
+  text-align: center;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.panel {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 10px;
+  width: 300px;
+}
+
+button {
+  margin-top: 10px;
+  padding: 8px;
+  background: #22c55e;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.mission {
+  background: #334155;
+  margin: 10px;
+  padding: 10px;
+  border-radius: 6px;
+}
