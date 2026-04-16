@@ -7,25 +7,13 @@ let party = JSON.parse(localStorage.getItem("party")) || [];
 let partySize = 3;
 
 // =====================================================
-// 🧠 FIX SAVED DATA (ensure stats exist)
-// =====================================================
-function ensureStats(p) {
-  if (!p.stats) {
-    p.stats = PlayerStatus.generateStats();
-  }
-  return p;
-}
-
-player = player ? ensureStats(player) : null;
-party = party.map(ensureStats);
-
-// =====================================================
-// 🎮 MODE
+// 🎮 MODE SYSTEM
 // =====================================================
 function setMode(selected) {
   mode = selected;
   localStorage.setItem("mode", mode);
 
+  renderSetup();
   renderAll();
 }
 
@@ -35,7 +23,7 @@ function renderMode() {
 }
 
 // =====================================================
-// 🧩 SETUP UI
+// 🧩 SETUP UI (SOLO / PARTY)
 // =====================================================
 function renderSetup() {
   const div = document.getElementById("playerSetup");
@@ -51,12 +39,11 @@ function renderSetup() {
   if (mode === "party") {
     div.innerHTML = `
       <label>Party Size:</label>
-      <input type="number" min="1" max="10"
-        id="partySizeInput"
-        value="${partySize}"
-        onchange="updatePartySize()">
+      <input type="number" min="1" max="10" value="${partySize}"
+        id="partySizeInput" onchange="updatePartySize()">
 
       <div id="partyNames"></div>
+
       <button onclick="createParty()">Start Party</button>
     `;
 
@@ -72,22 +59,24 @@ function renderPartyInputs() {
   for (let i = 0; i < partySize; i++) {
     html += `<input id="p${i}" placeholder="Player ${i + 1} name"><br>`;
   }
+
   div.innerHTML = html;
 }
 
 function updatePartySize() {
-  partySize = parseInt(document.getElementById("partySizeInput").value) || 1;
+  const val = parseInt(document.getElementById("partySizeInput").value);
+  partySize = val;
   renderPartyInputs();
 }
 
 // =====================================================
-// 👤 CREATE PLAYERS
+// 👤 PLAYER CREATION
 // =====================================================
 function createSoloPlayer() {
   const name = document.getElementById("soloName").value.trim();
   if (!name) return alert("Enter a name");
 
-  player = PlayerStatus.create(name);
+  player = { name, points: 0, level0Complete: 0 };
   localStorage.setItem("player", JSON.stringify(player));
 
   renderAll();
@@ -100,7 +89,11 @@ function createParty() {
     const input = document.getElementById(`p${i}`);
     const name = input?.value?.trim() || `Player ${i + 1}`;
 
-    party.push(PlayerStatus.create(name));
+    party.push({
+      name,
+      points: 0,
+      level0Complete: 0
+    });
   }
 
   localStorage.setItem("party", JSON.stringify(party));
@@ -108,40 +101,85 @@ function createParty() {
 }
 
 // =====================================================
-// 🧍 RENDER PLAYERS
+// 🧠 RULE ENGINE
 // =====================================================
-function renderPlayers() {
-  const soloEl = document.getElementById("playerInfo");
-  const partyEl = document.getElementById("partyContainer");
+const unlockRules = {
+  1: "level0_avg_2",
+  2: ""
+};
 
-  if (!soloEl || !partyEl) return;
+function checkRule(level) {
+  const rule = unlockRules[level];
 
-  if (mode === "solo") {
-    partyEl.innerHTML = "";
+  if (rule === "level0_avg_2") {
+    if (party.length === 0) return false;
 
-    if (!player) {
-      soloEl.innerHTML = "<p>No player created</p>";
-      return;
-    }
+    const avg =
+      party.reduce((s, p) => s + p.level0Complete, 0) / party.length;
 
-    PlayerStatus.renderSolo(player);
+    return avg >= 2;
   }
 
-  if (mode === "party") {
-    soloEl.innerHTML = "";
-
-    if (!party.length) {
-      partyEl.innerHTML = "<p>No party members</p>";
-      return;
-    }
-
-    PlayerStatus.renderParty(party);
-  }
+  return true;
 }
 
 // =====================================================
-// ❌ REMOVE PLAYER
+// 🧍 PLAYER DISPLAY
 // =====================================================
+function renderPlayers() {
+  const div = document.getElementById("playerInfo");
+  if (!div) return;
+
+  if (mode === "solo") {
+    if (!player) {
+      div.innerHTML = "<p>No player created</p>";
+      return;
+    }
+
+    div.innerHTML = `
+      <strong>${player.name}</strong>
+      <p>Points: ${player.points}</p>
+      <p>Rank: ${getRank(player.points)}</p>
+      <button onclick="addPoints(1)">+ Success (Gain Points)</button>
+      <button onclick="addPoints(-1)">- Fail (Lose Points)</button>
+      <p style="font-size:12px; opacity:0.7">
+        + = Success / - = Fail
+      </p>
+    `;
+  } else {
+    if (party.length === 0) {
+      div.innerHTML = "<p>No party members</p>";
+      return;
+    }
+
+    let html = `<h3>Party Rank: ${getCurrentRank()}</h3>`;
+    html += `<p>Total Points: ${getTotalPoints()}</p>`;
+
+    party.forEach((p, i) => {
+      html += `
+        <div class="player-card">
+          <strong>${p.name}</strong>
+          <p>${p.points} pts (${getRank(p.points)})</p>
+
+          <button onclick="addPoints(1, ${i})">+ Success</button>
+          <button onclick="addPoints(-1, ${i})">- Fail</button>
+
+          <p style="font-size:12px; opacity:0.7">
+            + = Success / - = Fail
+          </p>
+
+          <button onclick="removePlayer(${i})" style="background:#ef4444">
+            Remove
+          </button>
+          <hr>
+        </div>
+      `;
+    });
+
+    div.innerHTML = html;
+  }
+}
+
 function removePlayer(index) {
   if (!confirm("Remove this player?")) return;
 
@@ -152,39 +190,7 @@ function removePlayer(index) {
 }
 
 // =====================================================
-// 🎮 COLLAPSE CARD
-// =====================================================
-function toggleCard(header) {
-  const body = header.nextElementSibling;
-  body.style.display = body.style.display === "none" ? "block" : "none";
-}
-
-// =====================================================
-// 🧠 DRAG & DROP
-// =====================================================
-let draggedIndex = null;
-
-function dragStart(e, index) {
-  draggedIndex = index;
-}
-
-function allowDrop(e) {
-  e.preventDefault();
-}
-
-function drop(e, index) {
-  e.preventDefault();
-
-  const temp = party[draggedIndex];
-  party[draggedIndex] = party[index];
-  party[index] = temp;
-
-  localStorage.setItem("party", JSON.stringify(party));
-  renderAll();
-}
-
-// =====================================================
-// 📊 RANK SYSTEM
+// 📊 CORE HELPERS
 // =====================================================
 function getRank(points) {
   if (points <= 5) return "F";
@@ -199,7 +205,7 @@ function getRank(points) {
 
 function getTotalPoints() {
   if (mode === "solo") return player?.points || 0;
-  return party.reduce((s, p) => s + p.points, 0);
+  return party.reduce((sum, p) => sum + p.points, 0);
 }
 
 function getCurrentRank() {
@@ -214,15 +220,22 @@ function addPoints(amount, index = null, missionLevel = 0) {
     if (!player) return;
 
     player.points = Math.max(0, player.points + amount);
-    if (amount > 0 && missionLevel === 0) player.level0Complete++;
+
+    if (amount > 0 && missionLevel === 0) {
+      player.level0Complete++;
+    }
 
     localStorage.setItem("player", JSON.stringify(player));
+
   } else {
     const p = party[index];
     if (!p) return;
 
     p.points = Math.max(0, p.points + amount);
-    if (amount > 0 && missionLevel === 0) p.level0Complete++;
+
+    if (amount > 0 && missionLevel === 0) {
+      p.level0Complete++;
+    }
 
     localStorage.setItem("party", JSON.stringify(party));
   }
@@ -270,20 +283,13 @@ function generateBoard() {
 // =====================================================
 // 🔒 RULES
 // =====================================================
-const unlockRules = { 1: "level0_avg_2", 2: "" };
-
-function checkRule(level) {
-  if (unlockRules[level] !== "level0_avg_2") return true;
-  if (!party.length) return false;
-
-  const avg = party.reduce((s, p) => s + p.level0Complete, 0) / party.length;
-  return avg >= 2;
-}
-
 function isMissionAllowed(rank, level) {
-  const rankAccess = { F:1, D:2, C:3, B:4, A:5, S:6, SS:6, SSS:6 };
+  const rankAccess = {
+    F: 1, D: 2, C: 3, B: 4, A: 5, S: 6, SS: 6, SSS: 6
+  };
 
   if (level === 1) return checkRule(1);
+
   return level <= rankAccess[rank];
 }
 
@@ -303,21 +309,14 @@ function completeMission(level) {
     });
 
     localStorage.setItem("party", JSON.stringify(party));
+    renderAll();
   }
 
-  renderAll();
   alert(`Mission complete! +${reward} points`);
 }
 
-function toggleDropdown(header) {
-  const body = header.nextElementSibling;
-
-  body.style.display =
-    body.style.display === "none" ? "block" : "none";
-}
-
 // =====================================================
-// 🔄 RENDER ALL
+// 🎲 INIT
 // =====================================================
 function renderAll() {
   renderMode();
