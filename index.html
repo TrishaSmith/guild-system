@@ -4,22 +4,16 @@
   <meta charset="UTF-8">
   <title>Guild System</title>
   <link rel="stylesheet" href="style.css">
-  <script src="app.js" defer></script>
+  
+  <script src="app.js"></script>
+  <script src="dice.js"></script>
 </head>
+
 <body>
 
 <h1>🏛️ Guild Mission Board</h1>
 
 <div class="container">
-  
-  <!-- <div class="panel">
-    <h2>Select Mode</h2>
-
-    <button onclick="openSolo()">Solo Mode</button>
-    <button onclick="openParty()">Party Mode</button>
-
-    <div id="setupArea"></div>
-  </div> -->
 
   <div class="panel">
     <h2>Mode</h2>
@@ -30,9 +24,7 @@
 
   <div class="panel">
     <h2>Player Setup</h2>
-
     <div id="playerSetup"></div>
-
     <div id="playerInfo"></div>
   </div>
 
@@ -42,6 +34,7 @@
     <div id="missions"></div>
   </div>
 
+  <!-- 🎲 DICE PANEL -->
   <div class="panel">
     <h2>Roll Dice</h2>
 
@@ -58,19 +51,17 @@
 
     <input id="numDice" type="number" min="1" max="20" value="1">
 
-    <button onclick="rollDice()">Roll</button>
-
-    <h3 id="result">Result: -</h3>
+    <button onclick="Dice.roll()">Roll</button>
   </div>
 
+  <!-- 📜 HISTORY PANEL (SEPARATE) -->
   <div class="panel">
     <h2>History</h2>
     <div id="history"></div>
-    <button onclick="clearHistory()">Clear</button>
+    <button onclick="Dice.clearHistory()">Clear</button>
   </div>
-  
+
 </div>
 
-<script src="app.js"></script>
 </body>
 </html>
