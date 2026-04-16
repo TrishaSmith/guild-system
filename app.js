@@ -1,82 +1,19 @@
-// ---------- DATA ----------
-const missions = [
-  { level: 0, name: "Fix a bug in a loop" },
-  { level: 1, name: "Write a palindrome function" },
-  { level: 2, name: "Implement a stack" },
-  { level: 3, name: "Solve a recursion problem" },
-  { level: 4, name: "Optimize sorting algorithm" },
-  { level: 5, name: "Build pathfinding logic" },
-];
-
-const unlockRules = {
-  1: "level0_avg_2",
-  2: ""
-};
-
-// ---------- MODE ----------
+// =====================================================
+// 🧠 STATE
+// =====================================================
 let mode = localStorage.getItem("mode") || "solo";
 let player = JSON.parse(localStorage.getItem("player")) || null;
 let party = JSON.parse(localStorage.getItem("party")) || [];
+let partySize = 3;
 
-function openSolo() {
-  mode = "solo";
-  localStorage.setItem("mode", mode);
-
-  document.getElementById("setupArea").innerHTML = `
-    <input id="nameInput" placeholder="Enter player name">
-    <button onclick="createPlayer()">Start Solo</button>
-  `;
-}
-
-function openParty() {
-  mode = "party";
-  localStorage.setItem("mode", mode);
-
-  document.getElementById("setupArea").innerHTML = `
-    <input id="partySize" type="number" min="1" max="10" value="3">
-    <button onclick="initParty()">Create Party</button>
-  `;
-}
-
-function initParty() {
-  const size = parseInt(document.getElementById("partySize").value);
-
-  party = [];
-
-  for (let i = 0; i < size; i++) {
-    party.push({
-      name: `Player ${i + 1}`,
-      points: 0,
-      level0Complete: 0
-    });
-  }
-
-  localStorage.setItem("party", JSON.stringify(party));
-
-  renderAll();
-}
-
-// ---------- RULE ENGINE (LIGHT USE) ----------
-function checkRule(level) {
-  const rule = unlockRules[level];
-
-  if (rule === "level0_avg_2") {
-    if (party.length === 0) return false;
-
-    const avg =
-      party.reduce((s, p) => s + p.level0Complete, 0) /
-      party.length;
-
-    return avg >= 2;
-  }
-
-  return true;
-}
-
-// ---------- MODE ----------
+// =====================================================
+// 🎮 MODE SYSTEM
+// =====================================================
 function setMode(selected) {
   mode = selected;
   localStorage.setItem("mode", mode);
+
+  renderSetup();
   renderAll();
 }
 
@@ -85,7 +22,110 @@ function renderMode() {
   if (el) el.innerText = `Current Mode: ${mode.toUpperCase()}`;
 }
 
-// ---------- PLAYER DISPLAY ----------
+// =====================================================
+// 🧩 SETUP UI (SOLO / PARTY)
+// =====================================================
+function renderSetup() {
+  const div = document.getElementById("playerSetup");
+  if (!div) return;
+
+  if (mode === "solo") {
+    div.innerHTML = `
+      <input id="soloName" placeholder="Enter name">
+      <button onclick="createSoloPlayer()">Start Solo</button>
+    `;
+  }
+
+  if (mode === "party") {
+    div.innerHTML = `
+      <label>Party Size:</label>
+      <input type="number" min="1" max="10" value="${partySize}"
+        id="partySizeInput" onchange="updatePartySize()">
+
+      <div id="partyNames"></div>
+
+      <button onclick="createParty()">Start Party</button>
+    `;
+
+    renderPartyInputs();
+  }
+}
+
+function renderPartyInputs() {
+  const div = document.getElementById("partyNames");
+  if (!div) return;
+
+  let html = "";
+  for (let i = 0; i < partySize; i++) {
+    html += `<input id="p${i}" placeholder="Player ${i + 1} name"><br>`;
+  }
+
+  div.innerHTML = html;
+}
+
+function updatePartySize() {
+  const val = parseInt(document.getElementById("partySizeInput").value);
+  partySize = val;
+  renderPartyInputs();
+}
+
+// =====================================================
+// 👤 PLAYER CREATION
+// =====================================================
+function createSoloPlayer() {
+  const name = document.getElementById("soloName").value.trim();
+  if (!name) return alert("Enter a name");
+
+  player = { name, points: 0, level0Complete: 0 };
+  localStorage.setItem("player", JSON.stringify(player));
+
+  renderAll();
+}
+
+function createParty() {
+  party = [];
+
+  for (let i = 0; i < partySize; i++) {
+    const input = document.getElementById(`p${i}`);
+    const name = input?.value?.trim() || `Player ${i + 1}`;
+
+    party.push({
+      name,
+      points: 0,
+      level0Complete: 0
+    });
+  }
+
+  localStorage.setItem("party", JSON.stringify(party));
+  renderAll();
+}
+
+// =====================================================
+// 🧠 RULE ENGINE
+// =====================================================
+const unlockRules = {
+  1: "level0_avg_2",
+  2: ""
+};
+
+function checkRule(level) {
+  const rule = unlockRules[level];
+
+  if (rule === "level0_avg_2") {
+    if (party.length === 0) return false;
+
+    const avg =
+      party.reduce((s, p) => s + p.level0Complete, 0) / party.length;
+
+    return avg >= 2;
+  }
+
+  return true;
+}
+
+// =====================================================
+// 🧍 PLAYER DISPLAY
+// =====================================================
 function renderPlayers() {
   const div = document.getElementById("playerInfo");
   if (!div) return;
@@ -117,8 +157,8 @@ function renderPlayers() {
         <div class="player-card">
           <strong>${p.name}</strong>
           <p>${p.points} pts (${getRank(p.points)})</p>
-          <button onclick="addPoints(1, ${i})">+ </button>
-          <button onclick="addPoints(-1, ${i})">- </button>
+          <button onclick="addPoints(1, ${i})">+</button>
+          <button onclick="addPoints(-1, ${i})">-</button>
         </div>
       `;
     });
@@ -127,12 +167,9 @@ function renderPlayers() {
   }
 }
 
-function renderAll() {
-  renderMode();
-  renderPlayers();
-}
-
-// ---------- RANK ----------
+// =====================================================
+// 📊 CORE HELPERS
+// =====================================================
 function getRank(points) {
   if (points <= 5) return "F";
   if (points <= 10) return "D";
@@ -144,21 +181,6 @@ function getRank(points) {
   return "SSS";
 }
 
-// ---------- CREATE PLAYER ----------
-function createPlayer() {
-  const input = document.getElementById("nameInput");
-  if (!input) return;
-
-  const name = input.value.trim();
-  if (!name) return alert("Enter a name!");
-
-  player = { name, points: 0, level0Complete: 0 };
-
-  localStorage.setItem("player", JSON.stringify(player));
-  renderAll();
-}
-
-// ---------- TOTAL ----------
 function getTotalPoints() {
   if (mode === "solo") return player?.points || 0;
   return party.reduce((sum, p) => sum + p.points, 0);
@@ -168,7 +190,9 @@ function getCurrentRank() {
   return getRank(getTotalPoints());
 }
 
-// ---------- POINT SYSTEM ----------
+// =====================================================
+// ➕ POINT SYSTEM
+// =====================================================
 function addPoints(amount, index = null, missionLevel = 0) {
   if (mode === "solo") {
     if (!player) return;
@@ -197,9 +221,22 @@ function addPoints(amount, index = null, missionLevel = 0) {
   renderAll();
 }
 
-// ---------- MISSION BOARD ----------
+// =====================================================
+// 📜 MISSIONS
+// =====================================================
+const missions = [
+  { level: 0, name: "Fix a bug in a loop" },
+  { level: 1, name: "Write a palindrome function" },
+  { level: 2, name: "Implement a stack" },
+  { level: 3, name: "Solve a recursion problem" },
+  { level: 4, name: "Optimize sorting algorithm" },
+  { level: 5, name: "Build pathfinding logic" },
+];
+
 function generateBoard() {
   const container = document.getElementById("missions");
+  if (!container) return;
+
   container.innerHTML = "";
 
   const rank = getCurrentRank();
@@ -221,28 +258,22 @@ function generateBoard() {
   });
 }
 
-// ---------- RULES ----------
+// =====================================================
+// 🔒 RULES
+// =====================================================
 function isMissionAllowed(rank, level) {
   const rankAccess = {
-    "F": 1,
-    "D": 2,
-    "C": 3,
-    "B": 4,
-    "A": 5,
-    "S": 6,
-    "SS": 6,
-    "SSS": 6
+    F: 1, D: 2, C: 3, B: 4, A: 5, S: 6, SS: 6, SSS: 6
   };
 
-  // Level 1 rule now uses rule engine
-  if (level === 1) {
-    return checkRule(1);
-  }
+  if (level === 1) return checkRule(1);
 
   return level <= rankAccess[rank];
 }
 
-// ---------- COMPLETE ----------
+// =====================================================
+// 🏁 COMPLETE MISSION
+// =====================================================
 function completeMission(level) {
   const pointsMap = { 0:1, 1:2, 2:3, 3:4, 4:5, 5:6 };
   const reward = pointsMap[level] || 1;
@@ -252,10 +283,7 @@ function completeMission(level) {
   } else {
     party.forEach(p => {
       p.points += reward;
-
-      if (level === 0) {
-        p.level0Complete++;
-      }
+      if (level === 0) p.level0Complete++;
     });
 
     localStorage.setItem("party", JSON.stringify(party));
@@ -265,55 +293,13 @@ function completeMission(level) {
   alert(`Mission complete! +${reward} points`);
 }
 
-// ---------- DICE ----------
-function rollDice() {
-  const diceType = parseInt(document.getElementById("diceType").value);
-  const numDice = parseInt(document.getElementById("numDice").value);
-
-  let rolls = [];
-  let total = 0;
-
-  for (let i = 0; i < numDice; i++) {
-    let roll;
-
-    if (diceType === 100) {
-      const tens = Math.floor(Math.random() * 10) * 10;
-      const ones = Math.floor(Math.random() * 10);
-      roll = tens + ones || 100;
-    } else {
-      roll = Math.floor(Math.random() * diceType) + 1;
-    }
-
-    rolls.push(roll);
-    total += roll;
-  }
-
-  const resultText = `Rolled ${numDice}d${diceType}: [${rolls.join(", ")}] = ${total}`;
-  document.getElementById("result").innerText = resultText;
-
-  addToHistory(resultText);
+// =====================================================
+// 🎲 INIT
+// =====================================================
+function renderAll() {
+  renderMode();
+  renderSetup();
+  renderPlayers();
 }
 
-function addToHistory(text) {
-  const historyDiv = document.getElementById("history");
-
-  const entry = document.createElement("div");
-  entry.className = "roll-entry";
-  entry.textContent = text;
-
-  historyDiv.prepend(entry);
-}
-
-function clearHistory() {
-  document.getElementById("history").innerHTML = "";
-}
-
-// ---------- INIT ----------
-function initUI() {
-  if (mode === "solo") openSolo();
-  if (mode === "party") openParty();
-
-  renderAll();
-}
-
-initUI();
+renderAll();

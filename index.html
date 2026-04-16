@@ -12,13 +12,28 @@
 
 <div class="container">
   
-  <div class="panel">
+  <!-- <div class="panel">
     <h2>Select Mode</h2>
 
     <button onclick="openSolo()">Solo Mode</button>
     <button onclick="openParty()">Party Mode</button>
 
     <div id="setupArea"></div>
+  </div> -->
+
+  <div class="panel">
+    <h2>Mode</h2>
+    <button onclick="setMode('solo')">Solo</button>
+    <button onclick="setMode('party')">Party</button>
+    <p id="modeDisplay"></p>
+  </div>
+
+  <div class="panel">
+    <h2>Player Setup</h2>
+
+    <div id="playerSetup"></div>
+
+    <div id="playerInfo"></div>
   </div>
 
   <div class="panel">
