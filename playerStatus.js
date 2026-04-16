@@ -1,12 +1,9 @@
 // =========================
 // 🧠 PLAYER STATUS SYSTEM
-// RPG Stats + Party Support
 // =========================
 
 const PlayerStatus = {
-  // -------------------------
-  // 🎲 STAT GENERATOR
-  // -------------------------
+  // 🎲 STATS
   generateStats() {
     return {
       str: this.rollStat(),
@@ -20,9 +17,7 @@ const PlayerStatus = {
     return Math.floor(Math.random() * 10) + 1;
   },
 
-  // -------------------------
-  // 🧍 CREATE PLAYER
-  // -------------------------
+  // 🧍 CREATE
   create(name) {
     return {
       name,
@@ -32,9 +27,7 @@ const PlayerStatus = {
     };
   },
 
-  // -------------------------
-  // 💾 SAVE / LOAD
-  // -------------------------
+  // 💾 STORAGE
   saveSolo(player) {
     localStorage.setItem("player", JSON.stringify(player));
   },
@@ -51,44 +44,40 @@ const PlayerStatus = {
     return JSON.parse(localStorage.getItem("party")) || [];
   },
 
-  // -------------------------
-  // 🎮 RENDER SOLO PLAYER
-  // -------------------------
-renderSolo(player, containerId = "playerInfo") {
-  const el = document.getElementById(containerId);
-  if (!el || !player) return;
+  // 🎮 SOLO RENDER
+  renderSolo(player, containerId = "playerInfo") {
+    const el = document.getElementById(containerId);
+    if (!el || !player) return;
 
-  el.innerHTML = `
-    <div class="player-card">
-      <div class="card-header">
-        <strong>${player.name}</strong>
+    el.innerHTML = `
+      <div class="player-card">
+        <div class="card-header">
+          <strong>${player.name}</strong>
+        </div>
+
+        <div class="card-body">
+          <p>Points: ${player.points}</p>
+          <p>Rank: ${window.getRank(player.points)}</p>
+
+          <div class="action-buttons">
+            <button onclick="addPoints(1)">+ Success</button>
+            <button onclick="addPoints(-1)">- Fail</button>
+          </div>
+
+          <p class="hint">+ = Success / - = Fail</p>
+
+          <hr>
+
+          <p>⚔️ STR: ${player.stats.str}</p>
+          <p>🧠 INT: ${player.stats.int}</p>
+          <p>🛡️ DEF: ${player.stats.def}</p>
+          <p>⚡ LUCK: ${player.stats.luck}</p>
+        </div>
       </div>
+    `;
+  },
 
-      <div class="card-body">
-        <p>Points: ${player.points}</p>
-        <p>Rank: ${window.getRank(player.points)}</p>
-
-        <button onclick="addPoints(1)">+ Success</button>
-        <button onclick="addPoints(-1)">- Fail</button>
-
-        <p style="font-size:12px; opacity:0.7">
-          + = Success / - = Fail
-        </p>
-
-        <hr>
-
-        <p>⚔️ STR: ${player.stats.str}</p>
-        <p>🧠 INT: ${player.stats.int}</p>
-        <p>🛡️ DEF: ${player.stats.def}</p>
-        <p>⚡ LUCK: ${player.stats.luck}</p>
-      </div>
-    </div>
-  `;
-}
-
-  // -------------------------
-  // 👥 RENDER PARTY
-  // -------------------------
+  // 👥 PARTY RENDER
   renderParty(party, containerId = "partyContainer") {
     const el = document.getElementById(containerId);
     if (!el) return;
@@ -113,34 +102,35 @@ renderSolo(player, containerId = "playerInfo") {
             <p>Points: ${p.points}</p>
             <p>Rank: ${window.getRank(p.points)}</p>
 
+            <div class="action-buttons">
+              <button onclick="addPoints(1, ${i})">+ Success</button>
+              <button onclick="addPoints(-1, ${i})">- Fail</button>
+            </div>
+
+            <p class="hint">+ = Success / - = Fail</p>
+
             <hr>
 
-                <p>⚔️ STR: ${p.stats?.str ?? 0}</p>
-                <p>🧠 INT: ${p.stats?.int ?? 0}</p>
-                <p>🛡️ DEF: ${p.stats?.def ?? 0}</p>
-                <p>⚡ LUCK: ${p.stats?.luck ?? 0}</p>
+            <p>⚔️ STR: ${p.stats?.str ?? 0}</p>
+            <p>🧠 INT: ${p.stats?.int ?? 0}</p>
+            <p>🛡️ DEF: ${p.stats?.def ?? 0}</p>
+            <p>⚡ LUCK: ${p.stats?.luck ?? 0}</p>
 
             <hr>
 
-            <button onclick="removePlayer(${i})">Remove</button>
+            <button class="remove-btn" onclick="removePlayer(${i})">
+              Remove
+            </button>
 
-            <button onclick="addPoints(1, ${i})">+ Success</button>
-            <button onclick="addPoints(-1, ${i})">- Fail</button>
-
-            <p style="font-size:12px; opacity:0.7">
-            + = Success / - = Fail
-            </p>
           </div>
         </div>
       `;
-    });
+    }); // ✅ THIS WAS MISSING
 
-    el.innerHTML = html;
+    el.innerHTML = html; // ✅ ALSO REQUIRED
   },
 
-  // -------------------------
-  // ➕ ADD NEW PLAYER
-  // -------------------------
+  // ➕ ADD PLAYER
   addPlayer(name, partyMode = false) {
     const player = this.create(name);
 
