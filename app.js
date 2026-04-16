@@ -171,6 +171,7 @@ function renderPlayers() {
           <button onclick="removePlayer(${i})" style="background:#ef4444">
             Remove
           </button>
+          <hr>
         </div>
       `;
     });
