@@ -127,33 +127,37 @@ function checkRule(level) {
 // 🧍 PLAYER DISPLAY
 // =====================================================
 function renderPlayers() {
-  const div = document.getElementById("playerInfo");
-  if (!div) return;
+  const soloEl = document.getElementById("playerInfo");
+  const partyEl = document.getElementById("partyContainer");
+
+  if (!soloEl || !partyEl) return;
 
   if (mode === "solo") {
+    partyEl.innerHTML = "";
+
     if (!player) {
-      div.innerHTML = "<p>No player created</p>";
+      soloEl.innerHTML = "<p>No player created</p>";
       return;
     }
 
-    div.innerHTML = `
+    soloEl.innerHTML = `
       <strong>${player.name}</strong>
       <p>Points: ${player.points}</p>
       <p>Rank: ${getRank(player.points)}</p>
-      <button onclick="addPoints(1)">+ Success (Gain Points)</button>
-      <button onclick="addPoints(-1)">- Fail (Lose Points)</button>
-      <p style="font-size:12px; opacity:0.7">
-        + = Success / - = Fail
-      </p>
+      <button onclick="addPoints(1, null, 0)">+ Success</button>
+      <button onclick="addPoints(-1, null, 0)">- Fail</button>
     `;
-  } else {
-    if (party.length === 0) {
-      div.innerHTML = "<p>No party members</p>";
+  }
+
+  if (mode === "party") {
+    soloEl.innerHTML = "";
+
+    if (!party.length) {
+      partyEl.innerHTML = "<p>No party members</p>";
       return;
     }
 
     let html = `<h3>Party Rank: ${getCurrentRank()}</h3>`;
-    html += `<p>Total Points: ${getTotalPoints()}</p>`;
 
     party.forEach((p, i) => {
       html += `
@@ -161,22 +165,13 @@ function renderPlayers() {
           <strong>${p.name}</strong>
           <p>${p.points} pts (${getRank(p.points)})</p>
 
-          <button onclick="addPoints(1, ${i})">+ Success</button>
-          <button onclick="addPoints(-1, ${i})">- Fail</button>
-
-          <p style="font-size:12px; opacity:0.7">
-            + = Success / - = Fail
-          </p>
-
-          <button onclick="removePlayer(${i})" style="background:#ef4444">
-            Remove
-          </button>
-          <hr>
+          <button onclick="addPoints(1, ${i}, 0)">+ Success</button>
+          <button onclick="addPoints(-1, ${i}, 0)">- Fail</button>
         </div>
       `;
     });
 
-    div.innerHTML = html;
+    partyEl.innerHTML = html;
   }
 }
 
