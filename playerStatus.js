@@ -54,30 +54,37 @@ const PlayerStatus = {
   // -------------------------
   // 🎮 RENDER SOLO PLAYER
   // -------------------------
-  renderSolo(player, containerId = "playerInfo") {
-    const el = document.getElementById(containerId);
-    if (!el || !player) return;
+renderSolo(player, containerId = "playerInfo") {
+  const el = document.getElementById(containerId);
+  if (!el || !player) return;
 
-    el.innerHTML = `
-      <div class="player-card">
-        <div class="card-header">
-          <strong>${player.name}</strong>
-        </div>
-
-        <div class="card-body">
-          <p>Points: ${player.points}</p>
-          <p>Rank: ${window.getRank(player.points)}</p>
-
-          <hr>
-
-          <p>⚔️ STR: ${player.stats.str}</p>
-          <p>🧠 INT: ${player.stats.int}</p>
-          <p>🛡️ DEF: ${player.stats.def}</p>
-          <p>⚡ LUCK: ${player.stats.luck}</p>
-        </div>
+  el.innerHTML = `
+    <div class="player-card">
+      <div class="card-header">
+        <strong>${player.name}</strong>
       </div>
-    `;
-  },
+
+      <div class="card-body">
+        <p>Points: ${player.points}</p>
+        <p>Rank: ${window.getRank(player.points)}</p>
+
+        <button onclick="addPoints(1)">+ Success</button>
+        <button onclick="addPoints(-1)">- Fail</button>
+
+        <p style="font-size:12px; opacity:0.7">
+          + = Success / - = Fail
+        </p>
+
+        <hr>
+
+        <p>⚔️ STR: ${player.stats.str}</p>
+        <p>🧠 INT: ${player.stats.int}</p>
+        <p>🛡️ DEF: ${player.stats.def}</p>
+        <p>⚡ LUCK: ${player.stats.luck}</p>
+      </div>
+    </div>
+  `;
+}
 
   // -------------------------
   // 👥 RENDER PARTY
@@ -116,6 +123,13 @@ const PlayerStatus = {
             <hr>
 
             <button onclick="removePlayer(${i})">Remove</button>
+
+            <button onclick="addPoints(1, ${i})">+ Success</button>
+            <button onclick="addPoints(-1, ${i})">- Fail</button>
+
+            <p style="font-size:12px; opacity:0.7">
+            + = Success / - = Fail
+            </p>
           </div>
         </div>
       `;

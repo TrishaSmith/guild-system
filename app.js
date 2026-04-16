@@ -270,13 +270,6 @@ function generateBoard() {
 // =====================================================
 // 🔒 RULES
 // =====================================================
-function isMissionAllowed(rank, level) {
-  const rankAccess = { F:1, D:2, C:3, B:4, A:5, S:6, SS:6, SSS:6 };
-
-  if (level === 1) return checkRule(1);
-  return level <= rankAccess[rank];
-}
-
 const unlockRules = { 1: "level0_avg_2", 2: "" };
 
 function checkRule(level) {
@@ -285,6 +278,13 @@ function checkRule(level) {
 
   const avg = party.reduce((s, p) => s + p.level0Complete, 0) / party.length;
   return avg >= 2;
+}
+
+function isMissionAllowed(rank, level) {
+  const rankAccess = { F:1, D:2, C:3, B:4, A:5, S:6, SS:6, SSS:6 };
+
+  if (level === 1) return checkRule(1);
+  return level <= rankAccess[rank];
 }
 
 // =====================================================
