@@ -1,3 +1,8 @@
+// ---------- SOLOR / PARTY MODE ----------
+let mode = localStorage.getItem("mode") || "solo";
+let player = JSON.parse(localStorage.getItem("player")) || null;
+let party = JSON.parse(localStorage.getItem("party")) || [];
+
 // ---------- DATA ----------
 const missions = [
   { level: 0, name: "Fix a bug in a loop" },
@@ -9,8 +14,6 @@ const missions = [
 ];
 
 // ---------- PLAYER ----------
-let player = JSON.parse(localStorage.getItem("player")) || null;
-
 function getRank(points) {
   if (points <= 5) return "F";
   if (points <= 10) return "D";
