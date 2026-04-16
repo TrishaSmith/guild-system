@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Guild System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>🏛️ Guild Mission Board</h1>
+
+<div class="container">
+
+  <div class="panel">
+    <h2>Player</h2>
+    <input id="nameInput" placeholder="Enter name">
+    <button onclick="createPlayer()">Create Player</button>
+
+    <div id="playerInfo"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Mission Board</h2>
+    <button onclick="generateBoard()">Generate Missions</button>
+    <div id="missions"></div>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
