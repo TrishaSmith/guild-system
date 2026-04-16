@@ -90,5 +90,6 @@ function toggleDropdown(header) {
     body.style.display === "none" ? "block" : "none";
 }
 
+window.generateBoard = generateBoard;
 
 

@@ -90,7 +90,6 @@ button {
   width: 100%;
   max-width: 750px;
   margin: auto;
-  display: none;
 }
 
 .dropdown-header {
@@ -104,5 +103,5 @@ button {
 
 .dropdown-body {
   margin-top: 10px;
-  display: block;
+  display: none;
 }

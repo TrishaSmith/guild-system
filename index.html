@@ -38,16 +38,20 @@
   </div>
 
   <!-- PARTY / PLAYER DISPLAY (RPG CARDS GO HERE) -->
-  <div class="panel">
-    <h2>Adventurers</h2>
+  <div class="dropdown">
 
-    <!-- DRAG & DROP PARTY CONTAINER -->
-    <div id="partyContainer"></div>
+    <div class="dropdown-header" onclick="toggleDropdown(this)">
+      <h2>Adventurers</h2>
+      <span>▼</span>
+    </div>
 
-    <!-- SOLO PLAYER DISPLAY -->
-    <div id="playerInfo"></div>
+    <div class="dropdown-body">
+      <div id="partyContainer"></div>
+      <div id="playerInfo"></div>
+    </div>
+
   </div>
-
+  
   <!-- MISSIONS -->
   <div class="panel">
     <h2>Mission Board</h2>
@@ -59,7 +63,7 @@
   <div class="dropdown">
 
     <div class="dropdown-header" onclick="toggleDropdown(this)">
-      <h2>🧙 Quest Generator</h2>
+      <h2>🧙 Quest Generator </h2>
       <span>▼</span>
     </div>
 
