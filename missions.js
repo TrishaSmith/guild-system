@@ -33,6 +33,8 @@ function generateBoard() {
 
     container.appendChild(div);
   });
+
+  console.log("Generating missions...");
 }
 
 // =====================================================
@@ -81,8 +83,12 @@ function completeMission(level) {
   alert(`Mission complete! +${reward} points`);
 }
 
-// =====================================================
-// 🎲 INIT
-// =====================================================
-generateBoard();
+function toggleDropdown(header) {
+  const body = header.nextElementSibling;
+
+  body.style.display =
+    body.style.display === "none" ? "block" : "none";
+}
+
+
 

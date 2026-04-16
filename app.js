@@ -250,6 +250,7 @@ function renderAll() {
   renderMode();
   renderSetup();
   renderPlayers();
+  generateBoard(); // 🔥 REQUIRED
 }
 
 renderAll();
