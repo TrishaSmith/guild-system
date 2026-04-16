@@ -13,18 +13,12 @@
 <div class="container">
   
   <div class="panel">
-    <h2>Mode</h2>
-    <button onclick="setMode('solo')">Solo</button>
-    <button onclick="setMode('party')">Party</button>
-    <p id="modeDisplay"></p>
-  </div>
+    <h2>Select Mode</h2>
 
-  <div class="panel">
-    <h2>Player</h2>
-    <input id="nameInput" placeholder="Enter name">
-    <button onclick="createPlayer()">Create Player</button>
+    <button onclick="openSolo()">Solo Mode</button>
+    <button onclick="openParty()">Party Mode</button>
 
-    <div id="playerInfo"></div>
+    <div id="setupArea"></div>
   </div>
 
   <div class="panel">

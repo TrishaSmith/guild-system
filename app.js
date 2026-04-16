@@ -18,6 +18,44 @@ let mode = localStorage.getItem("mode") || "solo";
 let player = JSON.parse(localStorage.getItem("player")) || null;
 let party = JSON.parse(localStorage.getItem("party")) || [];
 
+function openSolo() {
+  mode = "solo";
+  localStorage.setItem("mode", mode);
+
+  document.getElementById("setupArea").innerHTML = `
+    <input id="nameInput" placeholder="Enter player name">
+    <button onclick="createPlayer()">Start Solo</button>
+  `;
+}
+
+function openParty() {
+  mode = "party";
+  localStorage.setItem("mode", mode);
+
+  document.getElementById("setupArea").innerHTML = `
+    <input id="partySize" type="number" min="1" max="10" value="3">
+    <button onclick="initParty()">Create Party</button>
+  `;
+}
+
+function initParty() {
+  const size = parseInt(document.getElementById("partySize").value);
+
+  party = [];
+
+  for (let i = 0; i < size; i++) {
+    party.push({
+      name: `Player ${i + 1}`,
+      points: 0,
+      level0Complete: 0
+    });
+  }
+
+  localStorage.setItem("party", JSON.stringify(party));
+
+  renderAll();
+}
+
 // ---------- RULE ENGINE (LIGHT USE) ----------
 function checkRule(level) {
   const rule = unlockRules[level];
@@ -50,6 +88,7 @@ function renderMode() {
 // ---------- PLAYER DISPLAY ----------
 function renderPlayers() {
   const div = document.getElementById("playerInfo");
+  if (!div) return;
 
   if (mode === "solo") {
     if (!player) {
@@ -107,21 +146,15 @@ function getRank(points) {
 
 // ---------- CREATE PLAYER ----------
 function createPlayer() {
-  const name = document.getElementById("nameInput").value.trim();
+  const input = document.getElementById("nameInput");
+  if (!input) return;
 
-  if (!name) {
-    alert("Enter a name!");
-    return;
-  }
+  const name = input.value.trim();
+  if (!name) return alert("Enter a name!");
 
-  if (mode === "solo") {
-    player = { name, points: 0, level0Complete: 0 };
-    localStorage.setItem("player", JSON.stringify(player));
-  } else {
-    party.push({ name, points: 0, level0Complete: 0 });
-    localStorage.setItem("party", JSON.stringify(party));
-  }
+  player = { name, points: 0, level0Complete: 0 };
 
+  localStorage.setItem("player", JSON.stringify(player));
   renderAll();
 }
 
@@ -276,4 +309,11 @@ function clearHistory() {
 }
 
 // ---------- INIT ----------
-renderAll();
+function initUI() {
+  if (mode === "solo") openSolo();
+  if (mode === "party") openParty();
+
+  renderAll();
+}
+
+initUI();
