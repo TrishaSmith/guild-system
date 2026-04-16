@@ -140,8 +140,11 @@ function renderPlayers() {
       <strong>${player.name}</strong>
       <p>Points: ${player.points}</p>
       <p>Rank: ${getRank(player.points)}</p>
-      <button onclick="addPoints(1)">+ Success</button>
-      <button onclick="addPoints(-1)">- Fail</button>
+      <button onclick="addPoints(1)">+ Success (Gain Points)</button>
+      <button onclick="addPoints(-1)">- Fail (Lose Points)</button>
+      <p style="font-size:12px; opacity:0.7">
+        + = Success / - = Fail
+      </p>
     `;
   } else {
     if (party.length === 0) {
@@ -157,14 +160,32 @@ function renderPlayers() {
         <div class="player-card">
           <strong>${p.name}</strong>
           <p>${p.points} pts (${getRank(p.points)})</p>
-          <button onclick="addPoints(1, ${i})">+</button>
-          <button onclick="addPoints(-1, ${i})">-</button>
+
+          <button onclick="addPoints(1, ${i})">+ Success</button>
+          <button onclick="addPoints(-1, ${i})">- Fail</button>
+
+          <p style="font-size:12px; opacity:0.7">
+            + = Success / - = Fail
+          </p>
+
+          <button onclick="removePlayer(${i})" style="background:#ef4444">
+            Remove
+          </button>
         </div>
       `;
     });
 
     div.innerHTML = html;
   }
+}
+
+function removePlayer(index) {
+  if (!confirm("Remove this player?")) return;
+
+  party.splice(index, 1);
+  localStorage.setItem("party", JSON.stringify(party));
+
+  renderAll();
 }
 
 // =====================================================
