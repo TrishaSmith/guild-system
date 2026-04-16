@@ -89,5 +89,40 @@ function isMissionAllowed(rank, level) {
   return level <= rankMap[rank];
 }
 
+// ---------- DICE ROLLER ----------
+function rollDice() {
+  const diceType = parseInt(document.getElementById("diceType").value);
+  const numDice = parseInt(document.getElementById("numDice").value);
+
+  let rolls = [];
+  let total = 0;
+
+  for (let i = 0; i < numDice; i++) {
+    const roll = Math.floor(Math.random() * diceType) + 1;
+    rolls.push(roll);
+    total += roll;
+  }
+
+  const resultText = `Rolled ${numDice}d${diceType}: [${rolls.join(", ")}] = ${total}`;
+  document.getElementById("result").innerText = resultText;
+
+  addToHistory(resultText);
+}
+
+function addToHistory(text) {
+  const historyDiv = document.getElementById("history");
+
+  const entry = document.createElement("div");
+  entry.className = "roll-entry";
+  entry.textContent = text;
+
+  historyDiv.prepend(entry);
+}
+
+function clearHistory() {
+  document.getElementById("history").innerHTML = "";
+}
+
 // ---------- INIT ----------
 renderPlayer();
+
