@@ -48,8 +48,7 @@ button {
   border-radius: 5px;
 }
 
-.divider {
-  border: none;
-  border-top: 1px solid #334155;
-  margin: 10px 0;
+.player-card {
+  padding: 10px;
+  border-bottom: 1px solid #334155;
 }
