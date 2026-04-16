@@ -40,12 +40,23 @@ function generateBoard() {
 // =====================================================
 function isMissionAllowed(rank, level) {
   const rankAccess = {
-    F: 1, D: 2, C: 3, B: 4, A: 5, S: 6, SS: 6, SSS: 6
+    F: 0,
+    D: 1,
+    C: 2,
+    B: 3,
+    A: 4,
+    S: 5,
+    SS: 5,
+    SSS: 5
   };
 
-  if (level === 1) return checkRule(1);
+  // ❗ FIRST: check rank gate
+  if (level > rankAccess[rank]) return false;
 
-  return level <= rankAccess[rank];
+  // ❗ THEN: apply special rules
+  if (level === 1 && !checkRule(1)) return false;
+
+  return true;
 }
 
 // =====================================================
@@ -69,4 +80,9 @@ function completeMission(level) {
 
   alert(`Mission complete! +${reward} points`);
 }
+
+// =====================================================
+// 🎲 INIT
+// =====================================================
+generateBoard();
 
