@@ -108,10 +108,10 @@ const PlayerStatus = {
 
             <hr>
 
-            <p>⚔️ STR: ${p.stats.str}</p>
-            <p>🧠 INT: ${p.stats.int}</p>
-            <p>🛡️ DEF: ${p.stats.def}</p>
-            <p>⚡ LUCK: ${p.stats.luck}</p>
+                <p>⚔️ STR: ${p.stats?.str ?? 0}</p>
+                <p>🧠 INT: ${p.stats?.int ?? 0}</p>
+                <p>🛡️ DEF: ${p.stats?.def ?? 0}</p>
+                <p>⚡ LUCK: ${p.stats?.luck ?? 0}</p>
 
             <hr>
 
@@ -139,3 +139,5 @@ const PlayerStatus = {
     }
   }
 };
+
+window.PlayerStatus = PlayerStatus;
