@@ -2,19 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Guild System</title>
+  <title>D&D Guild System</title>
+
   <link rel="stylesheet" href="style.css">
-  
-  <script src="app.js"></script>
-  <script src="dice.js"></script>
+
+  <script src="app.js" defer></script>
+  <script src="dice.js" defer></script>
+  <script src="playerStatus.js" defer></script>
 </head>
 
 <body>
 
-<h1>🏛️ Guild Mission Board</h1>
+<h1>🏛️ D&D Guild Mission Board</h1>
 
 <div class="container">
 
+  <!-- MODE -->
   <div class="panel">
     <h2>Mode</h2>
     <button onclick="setMode('solo')">Solo</button>
@@ -22,19 +25,31 @@
     <p id="modeDisplay"></p>
   </div>
 
+  <!-- PLAYER SETUP -->
   <div class="panel">
     <h2>Player Setup</h2>
     <div id="playerSetup"></div>
+  </div>
+
+  <!-- PARTY / PLAYER DISPLAY (RPG CARDS GO HERE) -->
+  <div class="panel">
+    <h2>Adventurers</h2>
+
+    <!-- DRAG & DROP PARTY CONTAINER -->
+    <div id="partyContainer"></div>
+
+    <!-- SOLO PLAYER DISPLAY -->
     <div id="playerInfo"></div>
   </div>
 
+  <!-- MISSIONS -->
   <div class="panel">
     <h2>Mission Board</h2>
     <button onclick="generateBoard()">Generate Missions</button>
     <div id="missions"></div>
   </div>
 
-  <!-- 🎲 DICE PANEL -->
+  <!-- DICE -->
   <div class="panel">
     <h2>Roll Dice</h2>
 
@@ -54,7 +69,7 @@
     <button onclick="Dice.roll()">Roll</button>
   </div>
 
-  <!-- 📜 HISTORY PANEL (SEPARATE) -->
+  <!-- HISTORY -->
   <div class="panel">
     <h2>History</h2>
     <div id="history"></div>

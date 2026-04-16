@@ -188,6 +188,35 @@ function removePlayer(index) {
   renderAll();
 }
 
+// toggle collapse
+function toggleCard(header) {
+  const body = header.nextElementSibling;
+  body.style.display = body.style.display === "none" ? "block" : "none";
+}
+
+// drag system (basic)
+let draggedIndex = null;
+
+function dragStart(e, index) {
+  draggedIndex = index;
+}
+
+function allowDrop(e) {
+  e.preventDefault();
+}
+
+function drop(e, index) {
+  e.preventDefault();
+
+  const temp = party[draggedIndex];
+  party[draggedIndex] = party[index];
+  party[index] = temp;
+
+  localStorage.setItem("party", JSON.stringify(party));
+  renderAll();
+}
+
+
 // =====================================================
 // 📊 CORE HELPERS
 // =====================================================
