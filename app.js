@@ -1,8 +1,3 @@
-// ---------- SOLOR / PARTY MODE ----------
-let mode = localStorage.getItem("mode") || "solo";
-let player = JSON.parse(localStorage.getItem("player")) || null;
-let party = JSON.parse(localStorage.getItem("party")) || [];
-
 // ---------- DATA ----------
 const missions = [
   { level: 0, name: "Fix a bug in a loop" },
@@ -13,7 +8,92 @@ const missions = [
   { level: 5, name: "Build pathfinding logic" },
 ];
 
-// ---------- PLAYER ----------
+const unlockRules = {
+  1: "level0_avg_2",
+  2: ""
+};
+
+// ---------- MODE ----------
+let mode = localStorage.getItem("mode") || "solo";
+let player = JSON.parse(localStorage.getItem("player")) || null;
+let party = JSON.parse(localStorage.getItem("party")) || [];
+
+// ---------- RULE ENGINE (LIGHT USE) ----------
+function checkRule(level) {
+  const rule = unlockRules[level];
+
+  if (rule === "level0_avg_2") {
+    if (party.length === 0) return false;
+
+    const avg =
+      party.reduce((s, p) => s + p.level0Complete, 0) /
+      party.length;
+
+    return avg >= 2;
+  }
+
+  return true;
+}
+
+// ---------- MODE ----------
+function setMode(selected) {
+  mode = selected;
+  localStorage.setItem("mode", mode);
+  renderAll();
+}
+
+function renderMode() {
+  const el = document.getElementById("modeDisplay");
+  if (el) el.innerText = `Current Mode: ${mode.toUpperCase()}`;
+}
+
+// ---------- PLAYER DISPLAY ----------
+function renderPlayers() {
+  const div = document.getElementById("playerInfo");
+
+  if (mode === "solo") {
+    if (!player) {
+      div.innerHTML = "<p>No player created</p>";
+      return;
+    }
+
+    div.innerHTML = `
+      <strong>${player.name}</strong>
+      <p>Points: ${player.points}</p>
+      <p>Rank: ${getRank(player.points)}</p>
+      <button onclick="addPoints(1)">+ Success</button>
+      <button onclick="addPoints(-1)">- Fail</button>
+    `;
+  } else {
+    if (party.length === 0) {
+      div.innerHTML = "<p>No party members</p>";
+      return;
+    }
+
+    let html = `<h3>Party Rank: ${getCurrentRank()}</h3>`;
+    html += `<p>Total Points: ${getTotalPoints()}</p>`;
+
+    party.forEach((p, i) => {
+      html += `
+        <div class="player-card">
+          <strong>${p.name}</strong>
+          <p>${p.points} pts (${getRank(p.points)})</p>
+          <button onclick="addPoints(1, ${i})">+ </button>
+          <button onclick="addPoints(-1, ${i})">- </button>
+        </div>
+      `;
+    });
+
+    div.innerHTML = html;
+  }
+}
+
+function renderAll() {
+  renderMode();
+  renderPlayers();
+}
+
+// ---------- RANK ----------
 function getRank(points) {
   if (points <= 5) return "F";
   if (points <= 10) return "D";
@@ -25,65 +105,77 @@ function getRank(points) {
   return "SSS";
 }
 
+// ---------- CREATE PLAYER ----------
 function createPlayer() {
-  const name = document.getElementById("nameInput").value;
-  player = { name, points: 0, level0Complete: 0 };
-  save();
-  renderPlayer();
-}
+  const name = document.getElementById("nameInput").value.trim();
 
-function addPoints(amount, missionLevel = 0) {
-  if (!player) return;
-
-  player.points = Math.max(0, player.points + amount);
-
-  // Track Level 0 completion
-  if (amount > 0 && missionLevel === 0) {
-    player.level0Complete++;
-  }
-
-  save();
-  renderPlayer();
-}
-
-function save() {
-  localStorage.setItem("player", JSON.stringify(player));
-}
-
-function renderPlayer() {
-  if (!player) {
-    document.getElementById("playerInfo").innerHTML = "<p>No player created</p>";
+  if (!name) {
+    alert("Enter a name!");
     return;
   }
 
-  document.getElementById("playerInfo").innerHTML = `
-    <p><strong>${player.name}</strong></p>
-    <p>Points: ${player.points}</p>
-    <p>Rank: ${getRank(player.points)}</p>
-    <p>Level 0 Completed: ${player.level0Complete}/2</p>
+  if (mode === "solo") {
+    player = { name, points: 0, level0Complete: 0 };
+    localStorage.setItem("player", JSON.stringify(player));
+  } else {
+    party.push({ name, points: 0, level0Complete: 0 });
+    localStorage.setItem("party", JSON.stringify(party));
+  }
 
-    <button onclick="addPoints(1)">+ Success</button>
-    <button onclick="addPoints(-1)">- Fail</button>
-  `;
+  renderAll();
+}
+
+// ---------- TOTAL ----------
+function getTotalPoints() {
+  if (mode === "solo") return player?.points || 0;
+  return party.reduce((sum, p) => sum + p.points, 0);
+}
+
+function getCurrentRank() {
+  return getRank(getTotalPoints());
+}
+
+// ---------- POINT SYSTEM ----------
+function addPoints(amount, index = null, missionLevel = 0) {
+  if (mode === "solo") {
+    if (!player) return;
+
+    player.points = Math.max(0, player.points + amount);
+
+    if (amount > 0 && missionLevel === 0) {
+      player.level0Complete++;
+    }
+
+    localStorage.setItem("player", JSON.stringify(player));
+
+  } else {
+    const p = party[index];
+    if (!p) return;
+
+    p.points = Math.max(0, p.points + amount);
+
+    if (amount > 0 && missionLevel === 0) {
+      p.level0Complete++;
+    }
+
+    localStorage.setItem("party", JSON.stringify(party));
+  }
+
+  renderAll();
 }
 
 // ---------- MISSION BOARD ----------
 function generateBoard() {
-  if (!player) {
-    alert("Create a player first!");
-    return;
-  }
-
   const container = document.getElementById("missions");
   container.innerHTML = "";
 
-  const playerRank = getRank(player.points);
+  const rank = getCurrentRank();
 
   missions.forEach(m => {
+    const allowed = isMissionAllowed(rank, m.level);
+
     const div = document.createElement("div");
     div.className = "mission";
-
-    const allowed = isMissionAllowed(playerRank, m.level);
 
     div.innerHTML = `
       <strong>Level ${m.level}</strong>
@@ -109,32 +201,38 @@ function isMissionAllowed(rank, level) {
     "SSS": 6
   };
 
-  // 🔒 Special Rule: Level 1 locked until 2 Level 0 complete
-  if (level === 1 && player.level0Complete < 2) {
-    return false;
+  // Level 1 rule now uses rule engine
+  if (level === 1) {
+    return checkRule(1);
   }
 
   return level <= rankAccess[rank];
 }
 
-// ---------- COMPLETE MISSION ----------
+// ---------- COMPLETE ----------
 function completeMission(level) {
-  const pointsMap = {
-    0: 1,
-    1: 2,
-    2: 3,
-    3: 4,
-    4: 5,
-    5: 6
-  };
-
+  const pointsMap = { 0:1, 1:2, 2:3, 3:4, 4:5, 5:6 };
   const reward = pointsMap[level] || 1;
-  addPoints(reward, level);
 
-  alert(`Mission Complete! +${reward} points`);
+  if (mode === "solo") {
+    addPoints(reward, null, level);
+  } else {
+    party.forEach(p => {
+      p.points += reward;
+
+      if (level === 0) {
+        p.level0Complete++;
+      }
+    });
+
+    localStorage.setItem("party", JSON.stringify(party));
+    renderAll();
+  }
+
+  alert(`Mission complete! +${reward} points`);
 }
 
-// ---------- DICE ROLLER ----------
+// ---------- DICE ----------
 function rollDice() {
   const diceType = parseInt(document.getElementById("diceType").value);
   const numDice = parseInt(document.getElementById("numDice").value);
@@ -145,12 +243,10 @@ function rollDice() {
   for (let i = 0; i < numDice; i++) {
     let roll;
 
-    // 🎯 Real D100 (two d10s)
     if (diceType === 100) {
       const tens = Math.floor(Math.random() * 10) * 10;
       const ones = Math.floor(Math.random() * 10);
-      roll = tens + ones;
-      if (roll === 0) roll = 100;
+      roll = tens + ones || 100;
     } else {
       roll = Math.floor(Math.random() * diceType) + 1;
     }
@@ -180,4 +276,4 @@ function clearHistory() {
 }
 
 // ---------- INIT ----------
-renderPlayer();
+renderAll();
