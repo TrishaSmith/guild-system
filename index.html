@@ -84,32 +84,35 @@
 
   </div>
 
+  <div class="stack">
   <!-- DICE -->
-  <div class="panel">
-    <h2>Roll Dice</h2>
+    <div class="panel">
+      <h2>Roll Dice</h2>
 
-    <select id="diceType">
-      <option value="2">D2</option>
-      <option value="4">D4</option>
-      <option value="6" selected>D6</option>
-      <option value="8">D8</option>
-      <option value="10">D10</option>
-      <option value="12">D12</option>
-      <option value="20">D20</option>
-      <option value="100">D100</option>
-    </select>
+      <select id="diceType">
+        <option value="2">D2</option>
+        <option value="4">D4</option>
+        <option value="6" selected>D6</option>
+        <option value="8">D8</option>
+        <option value="10">D10</option>
+        <option value="12">D12</option>
+        <option value="20">D20</option>
+        <option value="100">D100</option>
+      </select>
 
-    <input id="numDice" type="number" min="1" max="20" value="1">
+      <input id="numDice" type="number" min="1" max="20" value="1">
 
-    <button onclick="Dice.roll()">Roll</button>
+      <button onclick="Dice.roll()">Roll</button>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="panel">
+      <h2>History</h2>
+      <div id="history"></div>
+      <button onclick="Dice.clearHistory()">Clear</button>
+    </div>
   </div>
-
-  <!-- HISTORY -->
-  <div class="panel">
-    <h2>History</h2>
-    <div id="history"></div>
-    <button onclick="Dice.clearHistory()">Clear</button>
-  </div>
+  
 
 </div>
 
