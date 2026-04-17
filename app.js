@@ -135,17 +135,47 @@ function renderPlayers() {
   if (mode === "solo") {
     partyEl.innerHTML = "";
 
-    if (!player) {
+    // ✅ LOAD THROUGH PlayerStatus (this fixes missing stats)
+    const loaded = PlayerStatus.loadSolo();
+
+    if (!loaded) {
       soloEl.innerHTML = "<p>No player created</p>";
       return;
     }
 
+    player = loaded; // keep global in sync
+
     soloEl.innerHTML = `
-      <strong>${player.name}</strong>
-      <p>Points: ${player.points}</p>
-      <p>Rank: ${getRank(player.points)}</p>
-      <button onclick="addPoints(1, null, 0)">+ Success</button>
-      <button onclick="addPoints(-1, null, 0)">- Fail</button>
+      <div class="player-card">
+
+        <div class="card-header" onclick="toggleCard(this)">
+          <strong>${player.name}</strong>
+          <span>▼</span>
+        </div>
+
+        <div class="card-body">
+
+          <p>Points: ${player.points}</p>
+          <p>Rank: ${getRank(player.points)}</p>
+          <p>Level 0 Complete: ${player.level0Complete ?? 0}</p>
+
+          <div class="action-buttons">
+            <button onclick="addPoints(1, null, 0)">+ Success</button>
+            <button onclick="addPoints(-1, null, 0)">- Fail</button>
+          </div>
+
+          <p class="hint">+ = Success / - = Fail</p>
+
+          <hr>
+
+          <p>⚔️ STR: ${player.stats?.str ?? 0}</p>
+          <p>🧠 INT: ${player.stats?.int ?? 0}</p>
+          <p>🛡️ DEF: ${player.stats?.def ?? 0}</p>
+          <p>⚡ LUCK: ${player.stats?.luck ?? 0}</p>
+
+        </div>
+
+      </div>
     `;
   }
 
@@ -182,6 +212,11 @@ function removePlayer(index) {
   localStorage.setItem("party", JSON.stringify(party));
 
   renderAll();
+}
+
+function toggleCard(header) {
+  const body = header.nextElementSibling;
+  body.classList.toggle("active");
 }
 
 // =====================================================

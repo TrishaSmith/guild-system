@@ -84,6 +84,11 @@ button {
 
 .card-body {
   padding: 10px;
+  display: none;
+}
+
+.card-body.active {
+  display: block;
 }
 
 .dropdown {
@@ -106,3 +111,5 @@ button {
   margin-top: 10px;
   display: block;
 }
+
+

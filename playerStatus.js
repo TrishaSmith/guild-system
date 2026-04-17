@@ -27,6 +27,16 @@ const PlayerStatus = {
     };
   },
 
+  // 🧩 NORMALIZE (🔥 ensures all attributes exist)
+  normalizePlayer(p) {
+    return {
+      name: p.name || "Unknown",
+      points: p.points ?? 0,
+      level0Complete: p.level0Complete ?? 0,
+      stats: p.stats || this.generateStats()
+    };
+  },
+
   // 💾 STORAGE
   saveSolo(player) {
     localStorage.setItem("player", JSON.stringify(player));
@@ -37,17 +47,29 @@ const PlayerStatus = {
   },
 
   loadSolo() {
-    return JSON.parse(localStorage.getItem("player")) || null;
+    const player = JSON.parse(localStorage.getItem("player"));
+    if (!player) return null;
+
+    const normalized = this.normalizePlayer(player);
+    this.saveSolo(normalized); // persist fix
+    return normalized;
   },
 
   loadParty() {
-    return JSON.parse(localStorage.getItem("party")) || [];
+    let party = JSON.parse(localStorage.getItem("party")) || [];
+
+    party = party.map(p => this.normalizePlayer(p));
+    this.saveParty(party); // persist fix
+
+    return party;
   },
 
   // 🎮 SOLO RENDER
   renderSolo(player, containerId = "playerInfo") {
     const el = document.getElementById(containerId);
     if (!el || !player) return;
+
+    const rank = window.getRank ? window.getRank(player.points) : "Unranked";
 
     el.innerHTML = `
       <div class="player-card">
@@ -57,7 +79,8 @@ const PlayerStatus = {
 
         <div class="card-body">
           <p>Points: ${player.points}</p>
-          <p>Rank: ${window.getRank(player.points)}</p>
+          <p>Rank: ${rank}</p>
+          <p>Level 0 Complete: ${player.level0Complete}</p>
 
           <div class="action-buttons">
             <button onclick="addPoints(1)">+ Success</button>
@@ -85,6 +108,8 @@ const PlayerStatus = {
     let html = "";
 
     party.forEach((p, i) => {
+      const rank = window.getRank ? window.getRank(p.points) : "Unranked";
+
       html += `
         <div class="player-card"
              draggable="true"
@@ -100,7 +125,8 @@ const PlayerStatus = {
           <div class="card-body">
 
             <p>Points: ${p.points}</p>
-            <p>Rank: ${window.getRank(p.points)}</p>
+            <p>Rank: ${rank}</p>
+            <p>Level 0 Complete: ${p.level0Complete}</p>
 
             <div class="action-buttons">
               <button onclick="addPoints(1, ${i})">+ Success</button>
@@ -111,10 +137,10 @@ const PlayerStatus = {
 
             <hr>
 
-            <p>⚔️ STR: ${p.stats?.str ?? 0}</p>
-            <p>🧠 INT: ${p.stats?.int ?? 0}</p>
-            <p>🛡️ DEF: ${p.stats?.def ?? 0}</p>
-            <p>⚡ LUCK: ${p.stats?.luck ?? 0}</p>
+            <p>⚔️ STR: ${p.stats.str}</p>
+            <p>🧠 INT: ${p.stats.int}</p>
+            <p>🛡️ DEF: ${p.stats.def}</p>
+            <p>⚡ LUCK: ${p.stats.luck}</p>
 
             <hr>
 
@@ -125,9 +151,9 @@ const PlayerStatus = {
           </div>
         </div>
       `;
-    }); // ✅ THIS WAS MISSING
+    });
 
-    el.innerHTML = html; // ✅ ALSO REQUIRED
+    el.innerHTML = html;
   },
 
   // ➕ ADD PLAYER
@@ -138,8 +164,10 @@ const PlayerStatus = {
       const party = this.loadParty();
       party.push(player);
       this.saveParty(party);
+      this.renderParty(party); // 🔥 immediate update
     } else {
       this.saveSolo(player);
+      this.renderSolo(player); // 🔥 immediate update
     }
   }
 };
