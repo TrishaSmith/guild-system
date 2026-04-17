@@ -1,14 +1,14 @@
-// =====================================================
+// =========================
 // 🧠 STATE
-// =====================================================
+// =========================
 let mode = localStorage.getItem("mode") || "solo";
-let player = JSON.parse(localStorage.getItem("player")) || null;
-let party = JSON.parse(localStorage.getItem("party")) || [];
+let player = null;
+let party = [];
 let partySize = 3;
 
-// =====================================================
+// =========================
 // 🎮 MODE SYSTEM
-// =====================================================
+// =========================
 function setMode(selected) {
   mode = selected;
   localStorage.setItem("mode", mode);
@@ -22,9 +22,9 @@ function renderMode() {
   if (el) el.innerText = `Current Mode: ${mode.toUpperCase()}`;
 }
 
-// =====================================================
-// 🧩 SETUP UI (SOLO / PARTY)
-// =====================================================
+// =========================
+// 🧩 SETUP UI
+// =========================
 function renderSetup() {
   const div = document.getElementById("playerSetup");
   if (!div) return;
@@ -69,15 +69,15 @@ function updatePartySize() {
   renderPartyInputs();
 }
 
-// =====================================================
-// 👤 PLAYER CREATION
-// =====================================================
+// =========================
+// 👤 PLAYER CREATION (FIXED)
+// =========================
 function createSoloPlayer() {
   const name = document.getElementById("soloName").value.trim();
   if (!name) return alert("Enter a name");
 
-  player = { name, points: 0, level0Complete: 0 };
-  localStorage.setItem("player", JSON.stringify(player));
+  player = PlayerStatus.create(name);
+  PlayerStatus.saveSolo(player);
 
   renderAll();
 }
@@ -89,43 +89,16 @@ function createParty() {
     const input = document.getElementById(`p${i}`);
     const name = input?.value?.trim() || `Player ${i + 1}`;
 
-    party.push({
-      name,
-      points: 0,
-      level0Complete: 0
-    });
+    party = PlayerStatus.addToParty(name, party);
   }
 
-  localStorage.setItem("party", JSON.stringify(party));
+  PlayerStatus.saveParty(party);
   renderAll();
 }
 
-// =====================================================
-// 🧠 RULE ENGINE
-// =====================================================
-const unlockRules = {
-  1: "level0_avg_2",
-  2: ""
-};
-
-function checkRule(level) {
-  const rule = unlockRules[level];
-
-  if (rule === "level0_avg_2") {
-    if (party.length === 0) return false;
-
-    const avg =
-      party.reduce((s, p) => s + p.level0Complete, 0) / party.length;
-
-    return avg >= 2;
-  }
-
-  return true;
-}
-
-// =====================================================
+// =========================
 // 🧍 PLAYER DISPLAY
-// =====================================================
+// =========================
 function renderPlayers() {
   const soloEl = document.getElementById("playerInfo");
   const partyEl = document.getElementById("partyContainer");
@@ -135,15 +108,12 @@ function renderPlayers() {
   if (mode === "solo") {
     partyEl.innerHTML = "";
 
-    // ✅ LOAD THROUGH PlayerStatus (this fixes missing stats)
-    const loaded = PlayerStatus.loadSolo();
+    player = PlayerStatus.loadSolo();
 
-    if (!loaded) {
+    if (!player) {
       soloEl.innerHTML = "<p>No player created</p>";
       return;
     }
-
-    player = loaded; // keep global in sync
 
     soloEl.innerHTML = `
       <div class="player-card">
@@ -157,30 +127,29 @@ function renderPlayers() {
 
           <p>Points: ${player.points}</p>
           <p>Rank: ${getRank(player.points)}</p>
-          <p>Level 0 Complete: ${player.level0Complete ?? 0}</p>
+          <p>Level 0 Complete: ${player.level0Complete}</p>
 
           <div class="action-buttons">
             <button onclick="addPoints(1, null, 0)">+ Success</button>
             <button onclick="addPoints(-1, null, 0)">- Fail</button>
           </div>
 
-          <p class="hint">+ = Success / - = Fail</p>
-
           <hr>
 
-          <p>⚔️ STR: ${player.stats?.str ?? 0}</p>
-          <p>🧠 INT: ${player.stats?.int ?? 0}</p>
-          <p>🛡️ DEF: ${player.stats?.def ?? 0}</p>
-          <p>⚡ LUCK: ${player.stats?.luck ?? 0}</p>
+          <p>⚔️ STR: ${player.stats.str}</p>
+          <p>🧠 INT: ${player.stats.int}</p>
+          <p>🛡️ DEF: ${player.stats.def}</p>
+          <p>⚡ LUCK: ${player.stats.luck}</p>
 
         </div>
-
       </div>
     `;
   }
 
   if (mode === "party") {
     soloEl.innerHTML = "";
+
+    party = PlayerStatus.loadParty();
 
     if (!party.length) {
       partyEl.innerHTML = "<p>No party members</p>";
@@ -189,39 +158,61 @@ function renderPlayers() {
 
     let html = `<h3>Party Rank: ${getCurrentRank()}</h3>`;
 
-    party.forEach((p, i) => {
-      html += `
-        <div class="player-card">
-          <strong>${p.name}</strong>
-          <p>${p.points} pts (${getRank(p.points)})</p>
+    // party.forEach((p, i) => {
+    //   html += `
+    //     <div class="player-card">
+    //       <strong>${p.name}</strong>
+    //       <p>${p.points} pts (${getRank(p.points)})</p>
 
-          <button onclick="addPoints(1, ${i}, 0)">+ Success</button>
-          <button onclick="addPoints(-1, ${i}, 0)">- Fail</button>
+    //       <button onclick="addPoints(1, ${i}, 0)">+ Success</button>
+    //       <button onclick="addPoints(-1, ${i}, 0)">- Fail</button>
+    //     </div>
+    //   `;
+    // });
+
+    party.forEach((p, i) => {
+    html += `
+      <div class="player-card">
+
+        <div class="card-header" onclick="toggleCard(this)">
+          <strong>${p.name}</strong>
+          <span>▼</span>
         </div>
-      `;
-    });
+
+        <div class="card-body">
+
+          <p>Points: ${p.points}</p>
+          <p>Rank: ${getRank(p.points)}</p>
+          <p>Level 0 Complete: ${p.level0Complete ?? 0}</p>
+
+          <div class="action-buttons">
+            <button onclick="addPoints(1, ${i}, 0)">+ Success</button>
+            <button onclick="addPoints(-1, ${i}, 0)">- Fail</button>
+          </div>
+
+          <hr>
+
+          <p>⚔️ STR: ${p.stats?.str ?? 0}</p>
+          <p>🧠 INT: ${p.stats?.int ?? 0}</p>
+          <p>🛡️ DEF: ${p.stats?.def ?? 0}</p>
+          <p>⚡ LUCK: ${p.stats?.luck ?? 0}</p>
+
+          <hr>
+
+          <button onclick="removePlayer(${i})">Remove</button>
+
+        </div>
+      </div>
+    `;
+  });
 
     partyEl.innerHTML = html;
   }
 }
 
-function removePlayer(index) {
-  if (!confirm("Remove this player?")) return;
-
-  party.splice(index, 1);
-  localStorage.setItem("party", JSON.stringify(party));
-
-  renderAll();
-}
-
-function toggleCard(header) {
-  const body = header.nextElementSibling;
-  body.classList.toggle("active");
-}
-
-// =====================================================
-// 📊 CORE HELPERS
-// =====================================================
+// =========================
+// 📊 HELPERS (UNCHANGED)
+// =========================
 function getRank(points) {
   if (points <= 5) return "F";
   if (points <= 10) return "D";
@@ -233,6 +224,11 @@ function getRank(points) {
   return "SSS";
 }
 
+function toggleCard(header) {
+  const body = header.nextElementSibling;
+  body.classList.toggle("active");
+}
+
 function getTotalPoints() {
   if (mode === "solo") return player?.points || 0;
   return party.reduce((sum, p) => sum + p.points, 0);
@@ -242,9 +238,9 @@ function getCurrentRank() {
   return getRank(getTotalPoints());
 }
 
-// =====================================================
-// ➕ POINT SYSTEM
-// =====================================================
+// =========================
+// ➕ POINT SYSTEM (UNCHANGED LOGIC)
+// =========================
 function addPoints(amount, index = null, missionLevel = 0) {
   if (mode === "solo") {
     if (!player) return;
@@ -255,8 +251,7 @@ function addPoints(amount, index = null, missionLevel = 0) {
       player.level0Complete++;
     }
 
-    localStorage.setItem("player", JSON.stringify(player));
-
+    PlayerStatus.saveSolo(player);
   } else {
     const p = party[index];
     if (!p) return;
@@ -267,20 +262,20 @@ function addPoints(amount, index = null, missionLevel = 0) {
       p.level0Complete++;
     }
 
-    localStorage.setItem("party", JSON.stringify(party));
+    PlayerStatus.saveParty(party);
   }
 
   renderAll();
 }
 
-// =====================================================
+// =========================
 // 🎲 INIT
-// =====================================================
+// =========================
 function renderAll() {
   renderMode();
   renderSetup();
   renderPlayers();
-  generateBoard(); // 🔥 REQUIRED
+  generateBoard();
 }
 
 renderAll();
