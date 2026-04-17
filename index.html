@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -118,3 +119,125 @@
 
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>D&D Guild System</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <script src="app.js" defer></script>
+  <script src="dice.js" defer></script>
+  <script src="playerStatus.js" defer></script>
+  <script src="missions.js" defer></script>  
+
+  <script src="questScript.js" defer></script>  
+</head>
+
+<body>
+
+<h1>🏛️ D&D Guild Mission Board</h1>
+
+<div class="container">
+
+  <!-- MODE -->
+  <div class="stack">
+
+    <div class="panel">
+      <h2>Mode</h2>
+      <button onclick="setMode('solo')">Solo</button>
+      <button onclick="setMode('party')">Party</button>
+      <p id="modeDisplay"></p>
+    </div>
+
+    <div class="panel">
+      <h2>Player Setup</h2>
+      <div id="playerSetup"></div>
+    </div>
+
+  </div>
+
+  <!-- PARTY / PLAYER DISPLAY (RPG CARDS GO HERE) -->
+  <div class="panel">
+    <h2>Adventurers</h2>
+
+    <!-- DRAG & DROP PARTY CONTAINER -->
+    <div id="partyContainer"></div>
+
+    <!-- SOLO PLAYER DISPLAY -->
+    <div id="playerInfo"></div>
+  </div>
+
+  <!-- MISSIONS -->
+  <div class="panel">
+    <h2>Mission Board</h2>
+    <button onclick="generateBoard()">Generate Missions</button>
+    <div id="missions"></div>
+  </div>
+
+  <!-- 🔽 DROPDOWN -->
+  <div class="dropdown">
+
+    <div class="dropdown-header" onclick="toggleDropdown(this)">
+      <h2>🧙 Quest Generator</h2>
+      <span>▼</span>
+    </div>
+
+    <div class="dropdown-body">
+
+      <div class="panel">
+        <h2>Generate Quests</h2>
+
+        <label>Amount:</label>
+        <input id="questCount" type="number" value="10" min="1" max="100">
+
+        <button onclick="generateQuests()">Generate</button>
+        <button onclick="clearQuests()">Clear</button>
+      </div>
+
+      <div class="panel">
+        <h2>Quests</h2>
+        <div id="questList"></div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="stack">
+  <!-- DICE -->
+    <div class="panel">
+      <h2>Roll Dice</h2>
+
+      <select id="diceType">
+        <option value="2">D2</option>
+        <option value="4">D4</option>
+        <option value="6" selected>D6</option>
+        <option value="8">D8</option>
+        <option value="10">D10</option>
+        <option value="12">D12</option>
+        <option value="20">D20</option>
+        <option value="100">D100</option>
+      </select>
+
+      <input id="numDice" type="number" min="1" max="20" value="1">
+
+      <button onclick="Dice.roll()">Roll</button>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="panel">
+      <h2>History</h2>
+      <div id="history"></div>
+      <button onclick="Dice.clearHistory()">Clear</button>
+    </div>
+  </div>
+  
+
+</div>
+
+</body>
+</html>
+>>>>>>> 28e42d0b6b88b8c83b84cfac1874fcba27a0a32d
