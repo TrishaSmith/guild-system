@@ -97,19 +97,6 @@ function createParty() {
   renderAll();
 }
 
-// function removePlayer(index) {
-//   if (mode !== "party") return;
-
-//   // Remove player from array
-//   party.splice(index, 1);
-
-//   // Save updated party
-//   PlayerStatus.saveParty(party);
-
-//   // Re-render UI
-//   renderAll();
-// }
-
 function removePlayer(index) {
   if (!confirm("Remove this player?")) return;
 
@@ -158,18 +145,33 @@ function renderPlayers() {
             <button onclick="addPoints(-1, null, 0)">- Fail</button>
           </div>
 
-          <button onclick="Dice.roll()">🎲 Roll</button>
+          <hr>
+
+          <p>⚔️ STR: ${player.stats?.str ?? 0}</p>
+          <p>🧠 INT: ${player.stats?.int ?? 0}</p>
+          <p>🛡️ DEF: ${player.stats?.def ?? 0}</p>
+          <p>⚡ LUCK: ${player.stats?.luck ?? 0}</p>
 
           <hr>
 
-          <p>⚔️ STR: ${player.stats.str}</p>
-          <p>🧠 INT: ${player.stats.int}</p>
-          <p>🛡️ DEF: ${player.stats.def}</p>
-          <p>⚡ LUCK: ${player.stats.luck}</p>
+          <button onclick="Dice.roll(0)">🎲 Roll</button>
+          <button onclick="Dice.roll(0, true)" ${player.stats?.luck <= 0 ? "disabled" : ""}>
+            🍀 Use Luck
+          </button>
 
         </div>
       </div>
     `;
+
+    const card = soloEl.querySelector(".player-card");
+
+    if (openCards.has(0) && card) {
+      const body = card.querySelector(".card-body");
+      const arrow = card.querySelector("span");
+
+      body.classList.add("active");
+      arrow.classList.add("open");
+    }
   }
 
   if (mode === "party") {

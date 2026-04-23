@@ -35,6 +35,13 @@ body {
 .left { grid-column: 1; }
 .center { grid-column: 2; }
 .right { grid-column: 3; }
+.center-left { grid-column: 1 / 3; }
+.center-right { grid-column: 2 / 4; }
+
+.full {
+  grid-column: 1 / -1; /* spans ALL columns */
+  width: 100%;
+}
 
 .panel {
   background: #1e293b;
@@ -79,11 +86,6 @@ button {
   border-radius: 8px;
 
   scroll-snap-align: start;
-}
-
-.mission-board {
-  grid-column: 1 / -1; /* spans ALL columns */
-  width: 100%;
 }
 
 #missions {

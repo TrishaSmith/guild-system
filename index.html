@@ -6,27 +6,63 @@
 
   <!-- <base href="/guild-system/"> -->
 
-  <link rel="stylesheet" href="style.css">
+  <!-- MECHANICS: Main Game -->
+  <link rel="stylesheet" href="Main/style.css">
+  <script src="Main/app.js" defer></script>
+  <script src="Main/dice.js" defer></script>
 
-  <script src="app.js" defer></script>
-  <script src="dice.js" defer></script>
-  <script src="playerStatus.js" defer></script>
-  <script src="missions.js" defer></script>  
-  <script src="questScript.js" defer></script>  
+  <!-- MECHANICS: Player -->
+  <script src="Player/playerStatus.js" defer></script>
+
+  <!-- MECHANICS: Logs -->
+  <a href="Logs/questLog.html">Quest Logs</a>
+
+  <!-- GAME MODE: Premade Adventure -->
+  <script src="Quests/missions.js" defer></script>  
+
+  <!-- GAME MODE: Open World Adventure -->
+  <script src="Quests/questScript.js" defer></script>  
+  <link rel="stylesheet" href="Quests/questStyle.css">
+
 </head>
 
 <body>
 
-<h1>🏛️ D&D Guild Mission Board</h1>
+<h1>🏛️ Online DM (D&D Campaign)</h1>
 
 <div class="container">
 
-  <!-- 🟢 FULL WIDTH MISSION BOARD -->
-  <div class="panel mission-board">
-    <h2>Mission Board</h2>
+  <div class="panel center-left">
+    <h2>Guild Mission Board</h2>
     <button onclick="generateBoard()">Generate Missions</button>
     <div id="missions"></div>
   </div>
+
+  <div class="panel right">
+
+  <div class="dropdown">
+
+    <div class="dropdown-header" onclick="toggleDropdown(this)">
+      <h2>🧙 Quest Generator</h2>
+      <span>▼</span>
+    </div>
+
+    <div class="dropdown-body">
+
+      <label>Amount:</label>
+      <input id="questCount" type="number" value="10" min="1" max="100">
+
+      <button onclick="generateQuests()">Generate</button>
+      <button onclick="clearQuests()">Clear</button>
+
+      <div id="questList"></div>
+
+    </div>
+
+  </div>
+
+</div>
+  
 
   <!-- MISSIONS -->
   <!-- <div class="panel">
@@ -37,12 +73,6 @@
 
   <!-- 🔽 DROPDOWN -->
   <div class="dropdown">
-
-    <div class="dropdown-header" onclick="toggleDropdown(this)">
-      <h2>🧙 Quest Generator</h2>
-      <span>▼</span>
-    </div>
-
     <div class="dropdown-body">
 
       <div class="panel">
