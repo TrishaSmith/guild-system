@@ -1,6 +1,9 @@
 // =====================================================
 // 📜 MISSIONS
 // =====================================================
+const div = document.createElement("div");
+div.className = "mission-card";
+
 const missions = [
   { level: 0, name: "Fix a bug in a loop" },
   { level: 1, name: "Write a palindrome function" },

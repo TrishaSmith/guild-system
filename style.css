@@ -5,12 +5,12 @@ body {
   text-align: center;
 }
 
-.container {
+/* .container {
   display: flex;
   justify-content: center;
   gap: 20px;
-}
-
+} */
+ 
 /* Stack ALL panels vertically */
 /* .container { 
   display: flex;
@@ -19,11 +19,33 @@ body {
   gap: 20px;
 } */
 
+.container {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;/* left | center | right */
+  gap: 20px;
+  /* column-gap: 20px; */
+  /* max-width: 1200px; */
+  /* margin: auto; */
+}
+
+.container > * {
+  min-width: 0;
+}
+
+.left { grid-column: 1; }
+.center { grid-column: 2; }
+.right { grid-column: 3; }
+
 .panel {
   background: #1e293b;
   padding: 20px;
   border-radius: 10px;
-  width: 300px;
+  width: 100%; 
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+
+  outline: 1px solid #0f172a; /* subtle separator */
 }
 
 .stack {
@@ -41,11 +63,65 @@ button {
   cursor: pointer;
 }
 
-.mission {
+/* .mission {
   background: #334155;
   margin: 10px;
   padding: 10px;
   border-radius: 6px;
+} */
+
+.mission {
+  min-width: 250px;
+  flex: 0 0 auto;
+
+  background: #334155;
+  padding: 12px;
+  border-radius: 8px;
+
+  scroll-snap-align: start;
+}
+
+.mission-board {
+  grid-column: 1 / -1; /* spans ALL columns */
+  width: 100%;
+}
+
+#missions {
+  display: flex;
+  gap: 15px;
+
+  overflow-x: auto;
+  max-width: 100%;
+  overflow-y: hidden;
+
+  padding: 10px 0;
+
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+.mission-card {
+  min-width: 250px;   /* 🔥 key for horizontal layout */
+  flex: 0 0 auto;     /* prevents shrinking */
+
+  background: #1e1e2f;
+  border-radius: 10px;
+  padding: 15px;
+  color: white;
+
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  scroll-snap-align: start;
+}
+
+#missions::-webkit-scrollbar {
+  height: 8px;
+}
+
+#missions::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 10px;
 }
 
 #history {
@@ -91,11 +167,14 @@ button {
   display: block;
 }
 
+/* For the Players in the Adventurers List ... AKA Player Card */
+/* in (app.js) go to function toggleCard(header) - To update the "dropdown" for the player */
+
 .dropdown {
   width: 100%;
   max-width: 750px;
   margin: auto;
-  display: none;
+  display: block;
 }
 
 .dropdown-header {
@@ -107,8 +186,19 @@ button {
   border-radius: 8px;
 }
 
-.dropdown-body {
-  margin-top: 10px;
-  display: block;
+.dropdown-header span {
+  transition: transform 0.3s ease;
 }
 
+.dropdown-header span.open {
+  transform: rotate(180deg);
+}
+
+.dropdown-body {
+  margin-top: 10px;
+  display: none;
+}
+
+.dropdown-body.active {
+  display: block;
+}

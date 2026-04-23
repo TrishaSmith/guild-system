@@ -1,53 +1,107 @@
+// =========================
+// ❌ Disables rolling in party mode
+// =========================
+// const rollBtn = document.querySelector('[onclick="Dice.roll()"]');
+
+// if (rollBtn) {
+//   rollBtn.style.display = (mode === "solo") ? "inline-block" : "none";
+// }
+
 const Dice = {
-  roll() {
-    const diceType = parseInt(document.getElementById("diceType").value);
-    const numDice = parseInt(document.getElementById("numDice").value);
 
-    let rolls = [];
-    let total = 0;
+// =========================
+// 🎲 MAIN ROLL (UPDATED)
+// =========================
+ roll(playerIndex = null, useLuck = false) {
+  const diceType = parseInt(document.getElementById("diceType").value);
+  const numDice = parseInt(document.getElementById("numDice").value);
 
-    for (let i = 0; i < numDice; i++) {
-      let roll;
+  let roller = null;
+  let rollerName = "Free Roll";
+  let advantage = false;
 
-      // 🎲 D100
-      if (diceType === 100) {
-        const tens = Math.floor(Math.random() * 10) * 10;
-        const ones = Math.floor(Math.random() * 10);
-        roll = tens + ones;
-        if (roll === 0) roll = 100;
+  // 🧍 SOLO PLAYER
+  if (mode === "solo" && player) {
+    roller = player;
+  }
+
+  // 👥 PARTY PLAYER (only if index provided)
+  if (mode === "party" && playerIndex !== null) {
+    roller = party[playerIndex];
+  }
+
+  // 🎯 If we HAVE a player, we can use luck
+  if (roller) {
+    rollerName = roller.name;
+
+    let luck = roller?.stats?.luck || 0;
+
+    if (useLuck) {
+      if (luck <= 0) {
+        alert(`${rollerName} has no Luck left!`);
       } else {
-        roll = Math.floor(Math.random() * diceType) + 1;
+        advantage = true;
+        roller.stats.luck--; // spend luck
       }
+    }
+  }
 
-      rolls.push(roll);
-      total += roll;
+  // 🎲 Roll
+  const result = this.rollDice(diceType, numDice, advantage);
+
+  const advText = advantage ? " (ADVANTAGE -1 LUCK)" : "";
+
+  const resultText =
+    `${rollerName} rolled ${numDice}d${diceType}${advText}: ` +
+    `[${result.rolls.join(", ")}] = ${result.total}`;
+
+  this.showResult(resultText);
+  this.addToHistory(resultText);
+
+  // 💾 Save ONLY if a player was used
+  if (roller) {
+    if (mode === "solo") {
+      PlayerStatus.saveSolo(roller);
+    } else {
+      PlayerStatus.saveParty(party);
     }
 
-    const resultText =
-      `Rolled ${numDice}d${diceType}: [${rolls.join(", ")}] = ${total}`;
+    renderPlayers(); // update UI
+  }
 
-    this.showResult(resultText);
-    this.addToHistory(resultText);
+  return result;
+}, 
 
-    return { rolls, total };
-  },
-
-  // =========================
-  // 🧠 GENERIC ENGINE METHOD
-  // =========================
-  rollDice(type, count = 1) {
+// =========================
+// 🧠 GENERIC ENGINE
+// =========================
+  rollDice(type, count = 1, advantage = false) {
     let rolls = [];
     let total = 0;
 
     for (let i = 0; i < count; i++) {
-      const r = Math.floor(Math.random() * type) + 1;
-      rolls.push(r);
+      let r;
+
+      if (advantage) {
+        const r1 = Math.floor(Math.random() * type) + 1;
+        const r2 = Math.floor(Math.random() * type) + 1;
+        r = Math.max(r1, r2);
+
+        rolls.push(`${r1}|${r2} → ${r}`);
+      } else {
+        r = Math.floor(Math.random() * type) + 1;
+        rolls.push(r);
+      }
+
       total += r;
     }
 
     return { rolls, total };
   },
 
+  // =========================
+  // 🖥️ UI HELPERS
+  // =========================
   showResult(text) {
     const el = document.getElementById("result");
     if (el) el.innerText = text;

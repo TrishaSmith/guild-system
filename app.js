@@ -5,6 +5,7 @@ let mode = localStorage.getItem("mode") || "solo";
 let player = null;
 let party = [];
 let partySize = 3;
+let openCards = new Set();
 
 // =========================
 // 🎮 MODE SYSTEM
@@ -114,6 +115,8 @@ function removePlayer(index) {
 
   party.splice(index, 1);
   PlayerStatus.saveParty(party);
+
+  openCards.delete(index); // keep state clean
   renderAll();
 }
 
@@ -139,7 +142,7 @@ function renderPlayers() {
     soloEl.innerHTML = `
       <div class="player-card">
 
-        <div class="card-header" onclick="toggleCard(this)">
+        <div class="card-header" onclick="toggleCard(this, 0)">
           <strong>${player.name}</strong>
           <span>▼</span>
         </div>
@@ -154,6 +157,8 @@ function renderPlayers() {
             <button onclick="addPoints(1, null, 0)">+ Success</button>
             <button onclick="addPoints(-1, null, 0)">- Fail</button>
           </div>
+
+          <button onclick="Dice.roll()">🎲 Roll</button>
 
           <hr>
 
@@ -179,55 +184,59 @@ function renderPlayers() {
 
     let html = `<h3>Party Rank: ${getCurrentRank()}</h3>`;
 
-    // party.forEach((p, i) => {
-    //   html += `
-    //     <div class="player-card">
-    //       <strong>${p.name}</strong>
-    //       <p>${p.points} pts (${getRank(p.points)})</p>
-
-    //       <button onclick="addPoints(1, ${i}, 0)">+ Success</button>
-    //       <button onclick="addPoints(-1, ${i}, 0)">- Fail</button>
-    //     </div>
-    //   `;
-    // });
-
     party.forEach((p, i) => {
-    html += `
-      <div class="player-card">
+      html += `
+        <div class="player-card">
 
-        <div class="card-header" onclick="toggleCard(this)">
-          <strong>${p.name}</strong>
-          <span>▼</span>
-        </div>
-
-        <div class="card-body">
-
-          <p>Points: ${p.points}</p>
-          <p>Rank: ${getRank(p.points)}</p>
-          <p>Level 0 Complete: ${p.level0Complete ?? 0}</p>
-
-          <div class="action-buttons">
-            <button onclick="addPoints(1, ${i}, 0)">+ Success</button>
-            <button onclick="addPoints(-1, ${i}, 0)">- Fail</button>
+          <div class="card-header" onclick="toggleCard(this, ${i})">
+            <strong>${p.name}</strong>
+            <span>▼</span>
           </div>
 
-          <hr>
+          <div class="card-body">
 
-          <p>⚔️ STR: ${p.stats?.str ?? 0}</p>
-          <p>🧠 INT: ${p.stats?.int ?? 0}</p>
-          <p>🛡️ DEF: ${p.stats?.def ?? 0}</p>
-          <p>⚡ LUCK: ${p.stats?.luck ?? 0}</p>
+            <p>Points: ${p.points}</p>
+            <p>Rank: ${getRank(p.points)}</p>
+            <p>Level 0 Complete: ${p.level0Complete ?? 0}</p>
 
-          <hr>
+            <div class="action-buttons">
+              <button onclick="addPoints(1, ${i}, 0)">+ Success</button>
+              <button onclick="addPoints(-1, ${i}, 0)">- Fail</button>
+            </div>
 
-          <button onclick="removePlayer(${i})">Remove</button>
+            <hr>
 
+            <p>⚔️ STR: ${p.stats?.str ?? 0}</p>
+            <p>🧠 INT: ${p.stats?.int ?? 0}</p>
+            <p>🛡️ DEF: ${p.stats?.def ?? 0}</p>
+            <p>⚡ LUCK: ${p.stats?.luck ?? 0}</p>
+
+            <hr>
+
+            <button onclick="Dice.roll(${i})">🎲 Roll</button>
+            <button onclick="Dice.roll(${i}, true)" ${p.stats?.luck <= 0 ? "disabled" : ""}>
+              🍀 Use Luck
+            </button>
+
+          </div>
         </div>
-      </div>
-    `;
-  });
+      `;
+    });
 
     partyEl.innerHTML = html;
+
+    // ✅ Restore open cards
+    const cards = partyEl.querySelectorAll(".player-card");
+
+    cards.forEach((card, i) => {
+      if (openCards.has(i)) {
+        const body = card.querySelector(".card-body");
+        const arrow = card.querySelector("span");
+
+        body.classList.add("active");
+        arrow.classList.add("open");
+      }
+    });
   }
 }
 
@@ -245,9 +254,18 @@ function getRank(points) {
   return "SSS";
 }
 
-function toggleCard(header) {
+function toggleCard(header, index) {
   const body = header.nextElementSibling;
-  body.classList.toggle("active");
+  const isOpen = body.classList.toggle("active");
+
+  const arrow = header.querySelector("span");
+  arrow.classList.toggle("open");
+
+  if (isOpen) {
+    openCards.add(index);
+  } else {
+    openCards.delete(index);
+  }
 }
 
 function getTotalPoints() {
@@ -262,32 +280,6 @@ function getCurrentRank() {
 // =========================
 // ➕ POINT SYSTEM (UNCHANGED LOGIC)
 // =========================
-// function addPoints(amount, index = null, missionLevel = 0) {
-//   if (mode === "solo") {
-//     if (!player) return;
-
-//     player.points = Math.max(0, player.points + amount);
-
-//     if (amount > 0 && missionLevel === 0) {
-//       player.level0Complete++;
-//     }
-
-//     PlayerStatus.saveSolo(player);
-//   } else {
-//     const p = party[index];
-//     if (!p) return;
-
-//     p.points = Math.max(0, p.points + amount);
-
-//     if (amount > 0 && missionLevel === 0) {
-//       p.level0Complete++;
-//     }
-
-//     PlayerStatus.saveParty(party);
-//   }
-
-//   renderAll();
-// }
 
 // 4/17/2026 EDIT
 function addPoints(amount, index = null, missionLevel = 0) {
@@ -335,12 +327,12 @@ function renderAll() {
 
 renderAll();
 
-document.addEventListener("click", (e) => {
-  if (e.target.matches(".btn-success")) {
-    const index = e.target.dataset.index;
-    addPoints(1, Number(index), 0);
-  }
-});
+// document.addEventListener("click", (e) => {
+//   if (e.target.matches(".btn-success")) {
+//     const index = e.target.dataset.index;
+//     addPoints(1, Number(index), 0);
+//   }
+// });
 
 window.addPoints = addPoints;
 window.removePlayer = removePlayer;

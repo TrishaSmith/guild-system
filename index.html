@@ -4,13 +4,14 @@
   <meta charset="UTF-8">
   <title>D&D Guild System</title>
 
+  <!-- <base href="/guild-system/"> -->
+
   <link rel="stylesheet" href="style.css">
 
   <script src="app.js" defer></script>
   <script src="dice.js" defer></script>
   <script src="playerStatus.js" defer></script>
   <script src="missions.js" defer></script>  
-
   <script src="questScript.js" defer></script>  
 </head>
 
@@ -20,40 +21,19 @@
 
 <div class="container">
 
-  <!-- MODE -->
-  <div class="stack">
-
-    <div class="panel">
-      <h2>Mode</h2>
-      <button onclick="setMode('solo')">Solo</button>
-      <button onclick="setMode('party')">Party</button>
-      <p id="modeDisplay"></p>
-    </div>
-
-    <div class="panel">
-      <h2>Player Setup</h2>
-      <div id="playerSetup"></div>
-    </div>
-
-  </div>
-
-  <!-- PARTY / PLAYER DISPLAY (RPG CARDS GO HERE) -->
-  <div class="panel">
-    <h2>Adventurers</h2>
-
-    <!-- DRAG & DROP PARTY CONTAINER -->
-    <div id="partyContainer"></div>
-
-    <!-- SOLO PLAYER DISPLAY -->
-    <div id="playerInfo"></div>
-  </div>
-
-  <!-- MISSIONS -->
-  <div class="panel">
+  <!-- 🟢 FULL WIDTH MISSION BOARD -->
+  <div class="panel mission-board">
     <h2>Mission Board</h2>
     <button onclick="generateBoard()">Generate Missions</button>
     <div id="missions"></div>
   </div>
+
+  <!-- MISSIONS -->
+  <!-- <div class="panel">
+    <h2>Mission Board</h2>
+    <button onclick="generateBoard()">Generate Missions</button>
+    <div id="missions"></div>
+  </div> -->
 
   <!-- 🔽 DROPDOWN -->
   <div class="dropdown">
@@ -81,14 +61,42 @@
       </div>
 
     </div>
+  </div> <!-- End of Dropdown -->
 
-  </div>
+  <!-- PLAYER MODE -->
+  <div class="stack left">
 
-  <div class="stack">
-  <!-- DICE -->
+    <div class="panel">
+      <h2>Mode</h2>
+      <button onclick="setMode('solo')">Solo</button>
+      <button onclick="setMode('party')">Party</button>
+      <p id="modeDisplay"></p>
+    </div>
+
+    <div class="panel">
+      <h2>Player Setup</h2>
+      <div id="playerSetup"></div>
+    </div>
+
+  </div> <!-- End of Stack 1 -->
+  
+  <!-- PARTY / PLAYER DISPLAY (RPG CARDS GO HERE) -->
+
+  <div class="panel center">
+    <h2>Adventurers</h2>
+    <!-- DRAG & DROP PARTY CONTAINER -->
+    <div id="partyContainer"></div>
+ 
+    <!-- SOLO PLAYER DISPLAY -->
+    <div id="playerInfo"></div>
+  </div> <!-- End of Panel Center -->
+  
+
+  <!-- DICE + HISTORY -->
+  <div class="stack right">
+    <!-- DICE -->
     <div class="panel">
       <h2>Roll Dice</h2>
-
       <select id="diceType">
         <option value="2">D2</option>
         <option value="4">D4</option>
