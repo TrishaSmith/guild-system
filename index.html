@@ -4,26 +4,19 @@
   <meta charset="UTF-8">
   <title>D&D Guild System</title>
 
-  <!-- <base href="/guild-system/"> -->
-
-  <!-- MECHANICS: Main Game -->
+  <!-- STYLES -->
   <link rel="stylesheet" href="Main/style.css">
-  <script src="Main/app.js" defer></script>
+  <link rel="stylesheet" href="Quest/questStyle.css">
+
+  <!-- MAIN APP (MODULE SYSTEM) -->
+  <script type="module" src="Main/app.js"></script>
+
+  <!-- OPTIONAL: Non-module scripts (ONLY if needed globally) -->
   <script src="Main/dice.js" defer></script>
 
-  <!-- MECHANICS: Player -->
-  <script src="Player/playerStatus.js" defer></script>
-
-  <!-- MECHANICS: Logs -->
-  <a href="Logs/questLog.html">Quest Logs</a>
-
-  <!-- GAME MODE: Premade Adventure -->
-  <script src="Quests/missions.js" defer></script>  
-
-  <!-- GAME MODE: Open World Adventure -->
-  <script src="Quests/questScript.js" defer></script>  
-  <link rel="stylesheet" href="Quests/questStyle.css">
-
+  <!-- QUEST SYSTEM -->
+  <script src="Quest/missions.js" defer></script>
+  <script src="Quest/questScript.js" defer></script>
 </head>
 
 <body>
@@ -63,35 +56,12 @@
 
 </div>
   
-
   <!-- MISSIONS -->
   <!-- <div class="panel">
     <h2>Mission Board</h2>
     <button onclick="generateBoard()">Generate Missions</button>
     <div id="missions"></div>
   </div> -->
-
-  <!-- 🔽 DROPDOWN -->
-  <div class="dropdown">
-    <div class="dropdown-body">
-
-      <div class="panel">
-        <h2>Generate Quests</h2>
-
-        <label>Amount:</label>
-        <input id="questCount" type="number" value="10" min="1" max="100">
-
-        <button onclick="generateQuests()">Generate</button>
-        <button onclick="clearQuests()">Clear</button>
-      </div>
-
-      <div class="panel">
-        <h2>Quests</h2>
-        <div id="questList"></div>
-      </div>
-
-    </div>
-  </div> <!-- End of Dropdown -->
 
   <!-- PLAYER MODE -->
   <div class="stack left">

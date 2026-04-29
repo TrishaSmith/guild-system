@@ -1,9 +1,4 @@
-// =========================
-// 🧠 PLAYER STATUS SYSTEM (DATA LAYER)
-// =========================
-
-const PlayerStatus = {
-  // 🎲 STATS
+export const PlayerStatus = {
   generateStats() {
     return {
       str: this.rollStat(),
@@ -17,7 +12,6 @@ const PlayerStatus = {
     return Math.floor(Math.random() * 10) + 1;
   },
 
-  // 🧍 CREATE PLAYER (SINGLE SOURCE OF TRUTH)
   create(name) {
     return {
       name,
@@ -27,7 +21,6 @@ const PlayerStatus = {
     };
   },
 
-  // 🧩 NORMALIZE EXISTING DATA (CRITICAL FOR OLD SAVE DATA)
   normalizePlayer(p) {
     return {
       name: p?.name || "Unknown",
@@ -37,7 +30,6 @@ const PlayerStatus = {
     };
   },
 
-  // 💾 STORAGE
   saveSolo(player) {
     localStorage.setItem("player", JSON.stringify(player));
   },
@@ -64,12 +56,9 @@ const PlayerStatus = {
     return normalized;
   },
 
-  // ➕ FACTORY HELPERS (OPTIONAL BUT CLEAN)
   addToParty(name, party) {
     const player = this.create(name);
     party.push(player);
     return party;
   }
 };
-
-window.PlayerStatus = PlayerStatus;
