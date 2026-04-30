@@ -1,7 +1,8 @@
+console.log("APP LOADED");
+
 import * as Solo from "../Player/soloMode.js";
 import * as Party from "../Player/partyMode.js";
-import { PlayerStatus } from "./playerStatus.js";
-import { roll as gameRoll } from "./gameController.js"; // ✅ FIXED (was commented out)
+import { roll as gameRoll } from "./gameController.js";
 
 let mode = localStorage.getItem("mode") || "solo";
 let openCards = new Set();
@@ -9,13 +10,14 @@ let openCards = new Set();
 // =========================
 // 🎮 MODE SWITCH
 // =========================
-window.setMode = (m) => {
+function setMode(m) {
   mode = m;
   localStorage.setItem("mode", mode);
-
-  openCards.clear(); // ✅ small cleanup fix
   renderAll();
-};
+}
+
+// IMPORTANT: expose to HTML
+window.setMode = setMode;
 
 // =========================
 // 🧍 MODE DISPLAY
@@ -94,19 +96,20 @@ function renderAll() {
 }
 
 // =========================
-// 🌐 GLOBAL HOOKS
+// 🌐 GLOBAL HOOKS (THIS WAS YOUR MAIN BUG)
 // =========================
 window.renderAll = renderAll;
+window.updatePartySize = () => renderAll();
 
-window.updatePartySize = () => {
-  renderAll(); // ✅ FIX: full rerender instead of partial
-};
-
+// FIX: Dice must be exposed correctly
 window.Dice = {
   roll: gameRoll
 };
 
+// expose renderAll for safety
+window.renderAll = renderAll;
+
 // =========================
 // 🚀 INIT
 // =========================
-window.addEventListener("DOMContentLoaded", renderAll); // ✅ FIX: safe init
+window.addEventListener("DOMContentLoaded", renderAll);
