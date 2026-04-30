@@ -1,7 +1,7 @@
 import * as Solo from "../Player/soloMode.js";
 import * as Party from "../Player/partyMode.js";
 import { PlayerStatus } from "./playerStatus.js";
-import { roll as gameRoll } from "./gameController.js";
+// import { roll as gameRoll } from "./gameController.js";
 
 let mode = localStorage.getItem("mode") || "solo";
 let openCards = new Set();
@@ -100,9 +100,9 @@ window.updatePartySize = () => {
   renderPartyInputs();
 };
 
-window.Dice = {
-  roll: gameRoll
-};
+// window.Dice = {
+//   roll: gameRoll
+// };
 
 // window.toggleCard = toggleCard;
 
