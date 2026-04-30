@@ -18,57 +18,48 @@
 
 <body>
 
-<h1>🏛️ Online DM (D&D Campaign)</h1>
+  <h1>🏛️ Online DM (D&D Campaign)</h1>
 
-<div class="container">
+  <div class="container">
 
-  <div class="panel center-left">
-    <h2>Guild Mission Board</h2>
-    <button onclick="generateBoard()">Generate Missions</button>
-    <div id="missions"></div>
-  </div>
-
-  <div class="panel right">
-
-  <div class="dropdown">
-
-    <div class="dropdown-header" onclick="toggleDropdown(this)">
-      <h2>🧙 Quest Generator</h2>
-      <span>▼</span>
+    <div class="panel center-left">
+      <h2>Guild Mission Board</h2>
+      <button onclick="generateBoard()">Generate Missions</button>
+      <div id="missions"></div>
     </div>
 
-    <div class="dropdown-body">
+    <div class="panel right">
 
-      <label>Amount:</label>
-      <input id="questCount" type="number" value="10" min="1" max="100">
+    <div class="dropdown">
 
-      <button onclick="generateQuests()">Generate</button>
-      <button onclick="clearQuests()">Clear</button>
+      <div class="dropdown-header" onclick="toggleDropdown(this)">
+        <h2>🧙 Quest Generator</h2>
+        <span>▼</span>
+      </div>
 
-      <div id="questList"></div>
+      <div class="dropdown-body">
+
+        <label>Amount:</label>
+        <input id="questCount" type="number" value="10" min="1" max="100">
+
+        <button onclick="generateQuests()">Generate</button>
+        <button onclick="clearQuests()">Clear</button>
+
+        <div id="questList"></div>
+
+      </div>
 
     </div>
 
   </div>
-
-</div>
-  
-  <!-- MISSIONS -->
-  <!-- <div class="panel">
-    <h2>Mission Board</h2>
-    <button onclick="generateBoard()">Generate Missions</button>
-    <div id="missions"></div>
-  </div> -->
-
-  <!-- <input id="partySizeInput" onchange="updatePartySize()"> -->
 
   <!-- PLAYER MODE -->
   <div class="stack left">
 
     <div class="panel">
       <h2>Mode</h2>
-      <button onclick="setMode('solo')">Solo</button>
-      <button onclick="setMode('party')">Party</button>
+      <button onclick="setMode('solo')" id="soloBtn">Solo</button>
+      <button onclick="setMode('party')" id="partyBtn">Party</button> 
       <p id="modeDisplay"></p>
     </div>
 
@@ -109,7 +100,7 @@
 
       <input id="numDice" type="number" min="1" max="20" value="1">
 
-      <button onclick="Dice.roll()">Roll</button>
+      <button onclick="Dice.roll(null)">Roll</button>
     </div>
 
     <!-- HISTORY -->

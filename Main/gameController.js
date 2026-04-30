@@ -43,6 +43,10 @@ function buildRollText(roller, diceType, numDice, result, advantage) {
          `[${result.rolls.join(", ")}] = ${result.total}`;
 }
 
+function getMode() {
+  return localStorage.getItem("mode");
+}
+
 export function roll(playerIndex = null, useLuck = false) {
   const diceType = parseInt(document.getElementById("diceType").value);
   const numDice = parseInt(document.getElementById("numDice").value);
@@ -64,27 +68,34 @@ export function roll(playerIndex = null, useLuck = false) {
   );
 
   if (roller) {
-    const mode = localStorage.getItem("mode");
+    const mode = getMode();
+    // const mode = localStorage.getItem("mode");
 
     if (mode === "solo") {
-        PlayerStatus.saveSolo(roller);
+      PlayerStatus.saveSolo(roller);
     } else {
+      const party = PlayerStatus.loadParty();
+      if (mode === "party") {
         const party = PlayerStatus.loadParty();
-        party[playerIndex] = roller;
-        PlayerStatus.saveParty(party);
-    }
-    }
 
-    const history = document.getElementById("history");
-    if (history) {
+        if (playerIndex != null && party[playerIndex]) {
+          party[playerIndex] = roller;
+          PlayerStatus.saveParty(party);
+        }
+      }
+      PlayerStatus.saveParty(party);
+    }
+  }
+
+  const history = document.getElementById("history");
+  if (history) {
     const entry = document.createElement("div");
     entry.className = "roll-entry";
     entry.innerText = text;
     history.prepend(entry);
-    }
-  // save logic stays minimal here or moves to playerCore later
+  }
 
   if (window.renderAll) window.renderAll();
-  
+
   return result;
 }

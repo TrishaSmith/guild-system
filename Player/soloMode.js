@@ -4,25 +4,41 @@ import { renderStats } from "./playerCore.js";
 
 let player = null;
 
+// =========================
+// 🧩 CREATE SOLO PLAYER
+// =========================
 export function createSoloPlayer(name) {
   if (!name) return alert("Enter a name");
 
   player = PlayerStatus.create(name);
   PlayerStatus.saveSolo(player);
+
+  player = PlayerStatus.loadSolo(); // ✅ keeps memory in sync
 }
 
+// =========================
+// 📥 LOAD SOLO PLAYER
+// =========================
 export function loadSolo() {
   player = PlayerStatus.loadSolo();
   return player;
 }
 
+// =========================
+// ➕ POINTS
+// =========================
 export function addRankPoints(amount) {
   if (!player) return;
 
   player = addRankPointsToPlayer(player, amount, 0);
   PlayerStatus.saveSolo(player);
+
+  player = PlayerStatus.loadSolo(); // ✅ sync after save
 }
 
+// =========================
+// 🧩 SETUP UI
+// =========================
 export function renderSetup() {
   return `
     <input id="soloName" placeholder="Enter name">
@@ -30,13 +46,17 @@ export function renderSetup() {
   `;
 }
 
+// =========================
+// 🧍 RENDER SOLO
+// =========================
 export function renderSolo(openCards, toggleCard) {
-  player = loadSolo();
+  const player = PlayerStatus.loadSolo(); // ✅ FIX: no state mutation in render
 
   if (!player) return "<p>No player created</p>";
 
   return `
     <div class="player-card">
+
       <div class="card-header" onclick="toggleCard(this, 0)">
         <strong>${player.name}</strong>
         <span>▼</span>
@@ -51,29 +71,28 @@ export function renderSolo(openCards, toggleCard) {
           <button onclick="soloAdd(-1)">- Fail</button>
         </div>
 
-        ${renderStats(player.stats)} 
-        
+        ${renderStats(player.stats)}
+
         <div class="actions">
           <button onclick="Dice.roll(0)">🎲 Roll</button>
-          <button class="btn-luck" onclick="Dice.roll(0, true)" ${player.stats?.luck <= 0 ? "disabled" : ""}>
+
+          <button class="btn-luck"
+            onclick="Dice.roll(0, true)"
+            ${(Number(player.stats?.luck) || 0) <= 0 ? "disabled" : ""}>
             🍀 Use Luck
           </button>
-          <button class="remove-btn" onclick="removePlayer(0)">Remove</button>  
+
+          <button class="remove-btn" onclick="clearSoloPlayer()">Remove</button>
         </div>
-        
+
       </div>
     </div>
   `;
 }
 
-// expose for buttons
-// window.createSoloPlayer = () => {
-//   const name = document.getElementById("soloName")?.value?.trim();
-//   document.getElementById("soloName").value = "";
-//   createSoloPlayer(name);
-//   window.renderAll();
-// };
-
+// =========================
+// 🌐 GLOBAL HOOKS
+// =========================
 window.createSoloPlayerFromUI = () => {
   const name = document.getElementById("soloName")?.value?.trim();
 
@@ -88,5 +107,14 @@ window.createSoloPlayerFromUI = () => {
 
 window.soloAdd = (amt) => {
   addRankPoints(amt);
+  window.renderAll();
+};
+
+// =========================
+// ❌ OPTIONAL CLEANUP ACTION
+// =========================
+window.clearSoloPlayer = () => {
+  PlayerStatus.saveSolo(null);
+  player = null;
   window.renderAll();
 };

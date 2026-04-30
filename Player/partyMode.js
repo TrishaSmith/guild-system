@@ -8,21 +8,21 @@ let party = [];
 // 🧩 CREATE PARTY
 // =========================
 export function createParty(names) {
-party = [];
+  party = [];
 
-names.forEach(name => {
-party = PlayerStatus.addToParty(name || "Player", party);
-});
+  names.forEach(name => {
+    party = PlayerStatus.addToParty(name || "Player", party);
+  });
 
-PlayerStatus.saveParty(party);
+  PlayerStatus.saveParty(party);
 }
 
 // =========================
 // 📥 LOAD PARTY
 // =========================
 export function loadParty() {
-party = PlayerStatus.loadParty();
-return party;
+  party = PlayerStatus.loadParty();
+  return party;
 }
 
 // =========================
@@ -39,10 +39,10 @@ export function addRankPoints(index, amount) {
 }
 
 // =========================
-// 📊 TOTAL POINTS
+// 📊 TOTAL POINTS (FIXED)
 // =========================
-function getTotalRankPoints() {
-return party.reduce((sum, p) => sum + p.points, 0);
+function getTotalRankPoints(partyData) {
+  return partyData.reduce((sum, p) => sum + p.points, 0);
 }
 
 // =========================
@@ -51,17 +51,13 @@ return party.reduce((sum, p) => sum + p.points, 0);
 export function renderSetup() {
   return `
     <label>Party Size:</label>
+    <input id="partySizeInput" type="number" min="1" max="10" value="3">
 
-    <input 
-      id="partySizeInput" 
-      type="number" 
-      min="1" 
-      max="10" 
-      value="3"
-      onchange="updatePartySize()"
-    >
-
-    <div id="partyNames"></div>
+    <div id="partyNames">
+      ${Array.from({ length: 3 })
+        .map((_, i) => `<input id="p${i}" placeholder="Player ${i+1} name"><br>`)
+        .join("")}
+    </div>
 
     <button onclick="createPartyFromUI()">Start Party</button>
   `;
@@ -71,13 +67,13 @@ export function renderSetup() {
 // 🧍 RENDER PARTY
 // =========================
 export function renderParty(openCards, toggleCard) {
-  const party = loadParty();
+  const partyData = loadParty();
 
-  if (!party.length) return "<p>No party members</p>";
+  if (!partyData.length) return "<p>No party members</p>";
 
-  let html = `<h3>Party Rank: ${getTotalRankPoints()}</h3>`;
+  let html = `<h3>Party Rank: ${getTotalRankPoints(partyData)}</h3>`;
 
-  party.forEach((p, i) => {
+  partyData.forEach((p, i) => {
     html += `
       <div class="player-card">
 
@@ -99,9 +95,13 @@ export function renderParty(openCards, toggleCard) {
 
           <div class="actions">
             <button onclick="Dice.roll(${i})">🎲 Roll</button>
-            <button class="btn-luck" onclick="Dice.roll(${i}, true)" ${p.stats?.luck <= 0 ? "disabled" : ""}>
+
+            <button class="btn-luck"
+              onclick="Dice.roll(${i}, true)"
+              ${(Number(p.stats?.luck) || 0) <= 0 ? "disabled" : ""}>
               🍀 Use Luck
             </button>
+
             <button class="remove-btn" onclick="removePlayer(${i})">Remove</button>  
           </div>
         </div>
@@ -110,25 +110,25 @@ export function renderParty(openCards, toggleCard) {
     `;
   });
 
-  return html; // ✅ correct place
+  return html;
 }
 
 // =========================
-// ❌ REMOVE PLAYER (FIXED SCOPE BUG)
+// ❌ REMOVE PLAYER (FIXED SAFETY)
 // =========================
 export function removePlayer(index) {
   if (!confirm("Remove this player?")) return;
 
-  const party = PlayerStatus.loadParty();
-  party.splice(index, 1);
-  PlayerStatus.saveParty(party);
+  const partyData = PlayerStatus.loadParty();
+  partyData.splice(index, 1);
+  PlayerStatus.saveParty(partyData);
 }
 
 // =========================
 // 🌐 GLOBAL HOOKS
 // =========================
 
-// FIX: was missing UI bridge for setup
+// FIXED: no recursion / naming conflict risk avoided
 window.createPartyFromUI = () => {
   const size = document.getElementById("partySizeInput")?.value || 3;
 
@@ -140,17 +140,15 @@ window.createPartyFromUI = () => {
   }
 
   createParty(names);
-
   window.renderAll();
 };
 
-// FIX: missing import safety
 window.partyAdd = (i, amt) => {
   addRankPoints(i, amt);
   window.renderAll();
 };
 
-window.removePlayer = (index) => {
-  removePlayer(index);
-  window.renderAll();
-};
+// window.removePlayer = (index) => {
+//   removePlayer(index);
+//   window.renderAll();
+// };

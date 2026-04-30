@@ -1,7 +1,7 @@
 import * as Solo from "../Player/soloMode.js";
 import * as Party from "../Player/partyMode.js";
 import { PlayerStatus } from "./playerStatus.js";
-// import { roll as gameRoll } from "./gameController.js";
+import { roll as gameRoll } from "./gameController.js"; // ✅ FIXED (was commented out)
 
 let mode = localStorage.getItem("mode") || "solo";
 let openCards = new Set();
@@ -12,6 +12,8 @@ let openCards = new Set();
 window.setMode = (m) => {
   mode = m;
   localStorage.setItem("mode", mode);
+
+  openCards.clear(); // ✅ small cleanup fix
   renderAll();
 };
 
@@ -24,20 +26,24 @@ function renderMode() {
 }
 
 // =========================
-// 🧩 SETUP UI (STRUCTURE ONLY)
+// 🧩 SETUP UI
 // =========================
 function renderSetup() {
   const setupEl = document.getElementById("playerSetup");
   if (!setupEl) return;
 
   setupEl.innerHTML =
-  mode === "solo"
-  ? Solo.renderSetup()
-  : Party.renderSetup();
+    mode === "solo"
+      ? Solo.renderSetup()
+      : Party.renderSetup();
+
+  if (mode === "party") {
+    setTimeout(renderPartyInputs, 0);
+  }
 }
 
 // =========================
-// 👥 PARTY INPUTS (FIXED SEPARATION)
+// 👥 PARTY INPUTS
 // =========================
 function renderPartyInputs() {
   const container = document.getElementById("partyNames");
@@ -75,19 +81,15 @@ function renderAll() {
   renderMode();
   renderSetup();
 
-  if (mode === "party") {
-    renderPartyInputs(); // ✅ direct call
-  }
-
   const soloEl = document.getElementById("playerInfo");
   const partyEl = document.getElementById("partyContainer");
 
   if (mode === "solo") {
-    partyEl.innerHTML = "";
-    soloEl.innerHTML = Solo.renderSolo(openCards, toggleCard);
+    if (partyEl) partyEl.innerHTML = "";
+    if (soloEl) soloEl.innerHTML = Solo.renderSolo(openCards, toggleCard);
   } else {
-    soloEl.innerHTML = "";
-    partyEl.innerHTML = Party.renderParty(openCards, toggleCard);
+    if (soloEl) soloEl.innerHTML = "";
+    if (partyEl) partyEl.innerHTML = Party.renderParty(openCards, toggleCard);
   }
 }
 
@@ -97,21 +99,14 @@ function renderAll() {
 window.renderAll = renderAll;
 
 window.updatePartySize = () => {
-  renderPartyInputs();
+  renderAll(); // ✅ FIX: full rerender instead of partial
 };
 
-// window.Dice = {
-//   roll: gameRoll
-// };
-
-// window.toggleCard = toggleCard;
-
-// if (window.generateBoard) window.generateBoard = generateBoard;
-// if (window.clearQuests) window.clearQuests = clearQuests;
-// if (window.generateQuests) window.generateQuests = generateQuests;
-// if (window.toggleDropdown) window.toggleDropdown = toggleDropdown;
+window.Dice = {
+  roll: gameRoll
+};
 
 // =========================
 // 🚀 INIT
 // =========================
-renderAll();
+window.addEventListener("DOMContentLoaded", renderAll); // ✅ FIX: safe init
