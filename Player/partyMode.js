@@ -1,5 +1,6 @@
 import { PlayerStatus } from "./playerStatus.js";
-import { getRank, addPointsToPlayer } from "./playerCore.js";
+import { getGuildRank, addRankPointsToPlayer } from "./playerCore.js";
+import { renderStats } from "./playerCore.js";
 
 let party = [];
 
@@ -27,20 +28,20 @@ return party;
 // =========================
 // ➕ POINTS
 // =========================
-export function addPoints(index, amount) {
-party = loadParty();
+export function addRankPoints(index, amount) {
+  party = loadParty();
 
-if (!party[index]) return;
+  if (!party[index]) return;
 
-party[index] = addPointsToPlayer(party[index], amount, 0);
+  party[index] = addRankPointsToPlayer(party[index], amount, 0);
 
-PlayerStatus.saveParty(party);
+  PlayerStatus.saveParty(party);
 }
 
 // =========================
 // 📊 TOTAL POINTS
 // =========================
-function getTotalPoints() {
+function getTotalRankPoints() {
 return party.reduce((sum, p) => sum + p.points, 0);
 }
 
@@ -51,7 +52,14 @@ export function renderSetup() {
   return `
     <label>Party Size:</label>
 
-    <input id="partySizeInput" type="number" min="1" max="10" value="3">
+    <input 
+      id="partySizeInput" 
+      type="number" 
+      min="1" 
+      max="10" 
+      value="3"
+      onchange="updatePartySize()"
+    >
 
     <div id="partyNames"></div>
 
@@ -62,12 +70,12 @@ export function renderSetup() {
 // =========================
 // 🧍 RENDER PARTY
 // =========================
-export function renderParty(openCards) {
+export function renderParty(openCards, toggleCard) {
   const party = loadParty();
 
   if (!party.length) return "<p>No party members</p>";
 
-  let html = `<h3>Party Rank: ${getTotalPoints()}</h3>`;
+  let html = `<h3>Party Rank: ${getTotalRankPoints()}</h3>`;
 
   party.forEach((p, i) => {
     html += `
@@ -80,11 +88,22 @@ export function renderParty(openCards) {
 
         <div class="card-body ${openCards.has(i) ? "active" : ""}">
           <p>Points: ${p.points}</p>
-          <p>Rank: ${getRank(p.points)}</p>
+          <p>Rank: ${getGuildRank(p.points)}</p>
 
-          <button onclick="partyAdd(${i}, 1)">+ Success</button>
-          <button onclick="partyAdd(${i}, -1)">- Fail</button>
-          <button onclick="removePlayer(${i})">Remove</button>
+          <div class="actions">
+            <button onclick="partyAdd(${i}, 1)">+ Success</button>
+            <button onclick="partyAdd(${i}, -1)">- Fail</button>
+          </div>
+
+          ${renderStats(p.stats)}
+
+          <div class="actions">
+            <button onclick="Dice.roll(${i})">🎲 Roll</button>
+            <button class="btn-luck" onclick="Dice.roll(${i}, true)" ${p.stats?.luck <= 0 ? "disabled" : ""}>
+              🍀 Use Luck
+            </button>
+            <button class="remove-btn" onclick="removePlayer(${i})">Remove</button>  
+          </div>
         </div>
 
       </div>
@@ -127,7 +146,7 @@ window.createPartyFromUI = () => {
 
 // FIX: missing import safety
 window.partyAdd = (i, amt) => {
-  addPoints(i, amt);
+  addRankPoints(i, amt);
   window.renderAll();
 };
 

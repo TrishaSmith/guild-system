@@ -1,5 +1,7 @@
 import * as Solo from "../Player/soloMode.js";
 import * as Party from "../Player/partyMode.js";
+import { PlayerStatus } from "./playerStatus.js";
+import { roll as gameRoll } from "./gameController.js";
 
 let mode = localStorage.getItem("mode") || "solo";
 let openCards = new Set();
@@ -73,9 +75,8 @@ function renderAll() {
   renderMode();
   renderSetup();
 
-  // 🧠 delay ensures DOM exists
   if (mode === "party") {
-    setTimeout(renderPartyInputs, 0);
+    renderPartyInputs(); // ✅ direct call
   }
 
   const soloEl = document.getElementById("playerInfo");
@@ -98,6 +99,17 @@ window.renderAll = renderAll;
 window.updatePartySize = () => {
   renderPartyInputs();
 };
+
+window.Dice = {
+  roll: gameRoll
+};
+
+// window.toggleCard = toggleCard;
+
+// if (window.generateBoard) window.generateBoard = generateBoard;
+// if (window.clearQuests) window.clearQuests = clearQuests;
+// if (window.generateQuests) window.generateQuests = generateQuests;
+// if (window.toggleDropdown) window.toggleDropdown = toggleDropdown;
 
 // =========================
 // 🚀 INIT

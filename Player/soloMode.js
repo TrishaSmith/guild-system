@@ -1,5 +1,6 @@
 import { PlayerStatus } from "./playerStatus.js";
-import { getRank, addPointsToPlayer } from "./playerCore.js";
+import { getGuildRank, addRankPointsToPlayer } from "./playerCore.js";
+import { renderStats } from "./playerCore.js";
 
 let player = null;
 
@@ -15,17 +16,17 @@ export function loadSolo() {
   return player;
 }
 
-export function addPoints(amount) {
+export function addRankPoints(amount) {
   if (!player) return;
 
-  player = addPointsToPlayer(player, amount, 0);
+  player = addRankPointsToPlayer(player, amount, 0);
   PlayerStatus.saveSolo(player);
 }
 
 export function renderSetup() {
   return `
     <input id="soloName" placeholder="Enter name">
-    <button onclick="createSoloPlayer()">Start Solo</button>
+    <button onclick="createSoloPlayerFromUI()">Start Solo</button>
   `;
 }
 
@@ -43,24 +44,49 @@ export function renderSolo(openCards, toggleCard) {
 
       <div class="card-body ${openCards.has(0) ? "active" : ""}">
         <p>Points: ${player.points}</p>
-        <p>Rank: ${getRank(player.points)}</p>
+        <p>Rank: ${getGuildRank(player.points)}</p>
 
-        <button onclick="soloAdd(1)">+ Success</button>
-        <button onclick="soloAdd(-1)">- Fail</button>
+        <div class="actions">
+          <button onclick="soloAdd(1)">+ Success</button>
+          <button onclick="soloAdd(-1)">- Fail</button>
+        </div>
+
+        ${renderStats(player.stats)} 
+        
+        <div class="actions">
+          <button onclick="Dice.roll(0)">🎲 Roll</button>
+          <button class="btn-luck" onclick="Dice.roll(0, true)" ${player.stats?.luck <= 0 ? "disabled" : ""}>
+            🍀 Use Luck
+          </button>
+          <button class="remove-btn" onclick="removePlayer(0)">Remove</button>  
+        </div>
+        
       </div>
     </div>
   `;
 }
 
 // expose for buttons
-window.createSoloPlayer = () => {
+// window.createSoloPlayer = () => {
+//   const name = document.getElementById("soloName")?.value?.trim();
+//   document.getElementById("soloName").value = "";
+//   createSoloPlayer(name);
+//   window.renderAll();
+// };
+
+window.createSoloPlayerFromUI = () => {
   const name = document.getElementById("soloName")?.value?.trim();
-  document.getElementById("soloName").value = "";
+
+  if (!name) return alert("Enter a name");
+
   createSoloPlayer(name);
+
+  document.getElementById("soloName").value = "";
+
   window.renderAll();
 };
 
 window.soloAdd = (amt) => {
-  addPoints(amt);
+  addRankPoints(amt);
   window.renderAll();
 };
